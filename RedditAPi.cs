@@ -21,7 +21,7 @@ namespace Discord_Bot
             Console.WriteLine("Username: " + r.Account.Me.Name);
             Console.WriteLine("Cake Day: " + r.Account.Me.Created.ToString("D"));
 
-            foreach (Reddit.Controllers.Post post in r.Subreddit("memes").Posts.Hot)
+            foreach (Reddit.Controllers.Post post in r.Subreddit("").Posts.Hot)
             {
                 Console.WriteLine("Title: " + post.Title);
 

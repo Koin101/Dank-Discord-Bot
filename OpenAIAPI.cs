@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus.CommandsNext.Attributes;
 using OpenAI.GPT3;
 using OpenAI.GPT3.Managers;
 using OpenAI.GPT3.ObjectModels;
@@ -24,18 +25,21 @@ namespace Discord_Bot
         });
 
 
-        public async Task<string> Textrequest(string prompt)
+        public async Task<string> Textrequest(string prompt, string model, string temp)
         {
-            var CurieText = Model.CurieText;
-            var DaVinciText = Model.DavinciText;
-            double temp = 0.5;
-            var result =  await api.Completions.CreateCompletionAsync(new CompletionRequest(prompt, model: DaVinciText, temperature: temp, max_tokens:2000));
+            Model ChosenModel;
+            if (model == "curie") ChosenModel = Model.CurieText;
+            else if (model == "ada") ChosenModel = Model.AdaText;
+            else ChosenModel = Model.DavinciText;
+
+            
+            var result =  await api.Completions.CreateCompletionAsync(new CompletionRequest(prompt, model: ChosenModel, temperature: Convert.ToDouble(temp), max_tokens:2000));
 
             return result.ToString();
 
         }
 
-        public async Task<string> ImageRequest(string prompt)
+        public async Task<string> ImageRequest( string prompt)
         {
             var imageResult = await apiImage.Image.CreateImage(new ImageCreateRequest
             {
