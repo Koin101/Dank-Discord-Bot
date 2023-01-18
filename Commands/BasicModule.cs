@@ -20,6 +20,7 @@ namespace Discord_Bot.Commands
         OpenAI openAI = new OpenAI();
 
 
+
         [Command("chatGPT")]
         public async Task OpenAITextCall(CommandContext ctx, string prompt)
         {
@@ -43,6 +44,7 @@ namespace Discord_Bot.Commands
                 Color = DiscordColor.Black,
                 Description = prompt,
                 ImageUrl = result.Result
+
 
             };
             await ctx.RespondAsync(embed:embed);

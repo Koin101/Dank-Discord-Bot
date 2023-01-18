@@ -13,6 +13,7 @@ namespace Discord_Bot
 {
     public class RedditAPi
     {
+
         static void Main(string[] args)
         {
             RedditClient r = new RedditClient(appId: Environment.GetEnvironmentVariable("RedditID"),

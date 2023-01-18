@@ -15,6 +15,7 @@ namespace Discord_Bot
     class OpenAI
     {
         
+
         OpenAIAPI api = new OpenAIAPI(Environment.GetEnvironmentVariable("OpenAIKey"));
 
         OpenAIService apiImage = new OpenAIService(new OpenAiOptions()
