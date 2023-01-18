@@ -37,6 +37,7 @@ namespace Discord_Bot
             });
             commands.SetHelpFormatter<DefaultHelpFormatter>();
             commands.RegisterCommands<BasicModule>();
+            commands.RegisterCommands<CivRolls>();
             await discord.ConnectAsync();
             await Task.Delay(-1);
         }
