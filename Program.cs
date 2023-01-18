@@ -43,6 +43,7 @@ namespace Discord_Bot
             });
             commands.SetHelpFormatter<CustomHelpFormatter>();
             commands.RegisterCommands<BasicModule>();
+            commands.RegisterCommands<CivRolls>();
 
             
 
