@@ -1,4 +1,6 @@
 ﻿
+using Discord;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -18,7 +20,7 @@ namespace Discord_Bot.Commands
     public class BasicModule : BaseCommandModule
     {
         OpenAI openAI = new OpenAI();
-
+        RedditAPi reddit = new RedditAPi();
 
 
         [Command("chatGPT"), Description("this is chatGPT description")]
@@ -68,6 +70,31 @@ namespace Discord_Bot.Commands
             
         }
 
+        [Command("redditPost")]
+        public async Task RandomRedditPost(CommandContext ctx, [Description("The subreddit u want a post from")] string subreddit)
+        {
+            await ctx.TriggerTypingAsync();
+            DiscordMessage message;
+            var post = reddit.RetrieveRandomPostFromSubreddit(subreddit);
+            DiscordEmbedBuilder.EmbedFooter footer = new DiscordEmbedBuilder.EmbedFooter();
+            footer.Text = post.URL.ToString();
+            footer.IconUrl = "https://www.iconpacks.net/icons/2/free-reddit-logo-icon-2436-thumb.png";
+
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder
+            {
+                Color = DiscordColor.Black,
+                Title = post.Title,
+                ImageUrl = post.URL,
+                Footer = footer,
+
+            };
+
+            if(post.NSFW && !ctx.Channel.IsNSFW) { message = await ctx.RespondAsync("This is a non nsfw channel. Please ask for nsfw subreddits in an nsfw channel."); }
+            else { message = await ctx.RespondAsync(embed:embed);}
+
+            await message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+            
+        }
 
     }
 

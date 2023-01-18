@@ -13,24 +13,23 @@ namespace Discord_Bot
 {
     public class RedditAPi
     {
+        RedditClient r = new RedditClient(appId: Environment.GetEnvironmentVariable("RedditID"),
+                             appSecret: Environment.GetEnvironmentVariable("RedditSecret"), refreshToken: Environment.GetEnvironmentVariable("RedditRefreshToken"));
+        Random rdm = new Random();
 
-        static void Main(string[] args)
+
+
+        public LinkPost RetrieveRandomPostFromSubreddit(string subreddit)
         {
-            RedditClient r = new RedditClient(appId: Environment.GetEnvironmentVariable("RedditID"),
-                appSecret: Environment.GetEnvironmentVariable("RedditSecret"), refreshToken: Environment.GetEnvironmentVariable("RedditRefreshToken"));
-            Console.WriteLine("Username: " + r.Account.Me.Name);
-            Console.WriteLine("Cake Day: " + r.Account.Me.Created.ToString("D"));
+            var posts = r.Subreddit(subreddit).Posts.Hot;
 
-            foreach (Reddit.Controllers.Post post in r.Subreddit("").Posts.Hot)
-            {
-                Console.WriteLine("Title: " + post.Title);
+            var randomPost = posts[rdm.Next(posts.Count)];
 
-                // Both LinkPost and SelfPost derive from the Post class.  --Kris
-                Console.WriteLine(post.Listing.IsSelf
-                    ? "Body: " + ((SelfPost)post).SelfText
-                    : "URL: " + ((LinkPost)post).URL);
-            }
+            //while(randomPost.Listing.IsSelf) { randomPost = posts[rdm.Next(posts.Count)]; }
+
+            return (LinkPost) randomPost;
 
         }
     }
 }
+            

@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Discord_Bot.Commands;
 using DSharpPlus.CommandsNext.Converters;
+using DSharpPlus.Entities;
 
 namespace Discord_Bot
 {
@@ -31,16 +32,17 @@ namespace Discord_Bot
                 LogTimestampFormat = "dd MMM yyyy - hh:mm:ss"
             }); ;
 
+            discord.MessageCreated += async (s, e) =>
+            {
+                if (e.Author.Username == "maddestofmaxes") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:")); };
+            };
+
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
             {
                 StringPrefixes = new[] { "!" }
             });
             commands.SetHelpFormatter<CustomHelpFormatter>();
             commands.RegisterCommands<BasicModule>();
-
-
-            // set command discriptions
-            var commandDict = commands.RegisteredCommands;
 
             
 
