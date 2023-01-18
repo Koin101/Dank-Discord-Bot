@@ -35,11 +35,19 @@ namespace Discord_Bot
             {
                 StringPrefixes = new[] { "!" }
             });
-            commands.SetHelpFormatter<DefaultHelpFormatter>();
+            commands.SetHelpFormatter<CustomHelpFormatter>();
             commands.RegisterCommands<BasicModule>();
+
+
+            // set command discriptions
+            var commandDict = commands.RegisteredCommands;
+
+            
+
             await discord.ConnectAsync();
             await Task.Delay(-1);
         }
     }
 
 }
+
