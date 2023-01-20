@@ -8,6 +8,7 @@ using OpenAI.GPT3;
 using OpenAI.GPT3.Managers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -70,32 +71,73 @@ namespace Discord_Bot.Commands
             
         }
 
-        [Command("redditPost")]
-        public async Task RandomRedditPost(CommandContext ctx, [Description("The subreddit u want a post from")] string subreddit)
+        //[Command("redditPost")]
+        //public async Task RandomRedditPost(CommandContext ctx, [Description("The subreddit u want a post from")] string subreddit)
+        //{
+        //    await ctx.TriggerTypingAsync();
+        //    DiscordMessage message;
+        //    var post = reddit.RetrieveRandomPostFromSubreddit(subreddit);
+        //    DiscordEmbedBuilder.EmbedFooter footer = new DiscordEmbedBuilder.EmbedFooter();
+        //    footer.Text = post.URL.ToString();
+        //    footer.IconUrl = "https://www.iconpacks.net/icons/2/free-reddit-logo-icon-2436-thumb.png";
+
+        //    DiscordEmbedBuilder embed = new DiscordEmbedBuilder
+        //    {
+        //        Color = DiscordColor.Black,
+        //        Title = post.Title,
+        //        ImageUrl = post.URL,
+        //        Footer = footer,
+
+        //    };
+
+        //    if(post.NSFW && !ctx.Channel.IsNSFW) { message = await ctx.RespondAsync("This is a non nsfw channel. Please ask for nsfw subreddits in an nsfw channel."); }
+        //    else { message = await ctx.RespondAsync(embed:embed);}
+
+        //    await message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+
+        //}
+
+        [Command("5Stack"), Description("This command will ping everyone with the @league tag who isn't already in the voice channel.")]
+        public async Task ping5Stack(CommandContext ctx)
         {
-            await ctx.TriggerTypingAsync();
-            DiscordMessage message;
-            var post = reddit.RetrieveRandomPostFromSubreddit(subreddit);
-            DiscordEmbedBuilder.EmbedFooter footer = new DiscordEmbedBuilder.EmbedFooter();
-            footer.Text = post.URL.ToString();
-            footer.IconUrl = "https://www.iconpacks.net/icons/2/free-reddit-logo-icon-2436-thumb.png";
-
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder
-            {
-                Color = DiscordColor.Black,
-                Title = post.Title,
-                ImageUrl = post.URL,
-                Footer = footer,
-
-            };
-
-            if(post.NSFW && !ctx.Channel.IsNSFW) { message = await ctx.RespondAsync("This is a non nsfw channel. Please ask for nsfw subreddits in an nsfw channel."); }
-            else { message = await ctx.RespondAsync(embed:embed);}
-
-            await message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+            DiscordRole LeagueRole = ctx.Guild.GetRole(828775478231040031);
+            var LeagueUsers = ctx.Guild.Members.Where(user => user.Value.Roles.Contains(LeagueRole));
+            var LeagueUsersDict = LeagueUsers.ToDictionary(i => i.Key, i => i.Value);
+            var ChannelUsers = ctx.Guild.VoiceStates[173016823883628545].Channel.Users;
             
-        }
+            StringBuilder stringBuilder = new StringBuilder();
 
+            stringBuilder.Append("Hey! ");
+            int i = 1;
+
+            foreach (var channelUser in ChannelUsers) LeagueUsersDict.Remove(channelUser.Id);            
+
+            foreach (var user in LeagueUsersDict.Values)
+            {              
+                stringBuilder.Append(user.Mention);
+                if (i < LeagueUsersDict.Count()) stringBuilder.Append(", ");
+                else stringBuilder.Append(": \n");
+                i++;
+            }
+            i = 1;
+            foreach (var user in ChannelUsers) 
+            { 
+
+                stringBuilder.Append(user.Mention);
+                if (i < ChannelUsers.Count)
+                {
+                    stringBuilder.Append(", ");
+                }
+                else
+                    stringBuilder.Append(": ");
+                i++;
+            }
+
+            stringBuilder.Append("\nReally want to play League with a 5 stack. Join them or ur gay");
+
+            await ctx.RespondAsync(stringBuilder.ToString());
+
+        }
     }
 
    
