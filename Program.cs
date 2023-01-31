@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord_Bot.Commands;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
+using System.Reflection.Metadata;
 
 namespace Discord_Bot
 {
@@ -34,7 +35,14 @@ namespace Discord_Bot
 
             discord.MessageCreated += async (s, e) =>
             {
-                if (e.Author.Username == "maddestofmaxes") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:")); };
+                string username = e.Author.Username;
+                string message = e.Message.Content.ToLower();
+                if (username == "maddestofmaxes") 
+                    await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:"));
+                bool isMaintainer = username == "sonicos1" || username == "Neoblasterz";
+                if ((message == "who asked" || message == "who asked?") && !isMaintainer)
+                    await e.Message.RespondAsync("I did");
+
             };
 
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
@@ -42,7 +50,7 @@ namespace Discord_Bot
                 StringPrefixes = new[] { "!" }
             });
             commands.SetHelpFormatter<CustomHelpFormatter>();
-            commands.RegisterCommands<BasicModule>();
+            commands.RegisterCommands<Misc>();
             commands.RegisterCommands<CivRolls>();
 
             

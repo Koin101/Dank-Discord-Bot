@@ -1,5 +1,6 @@
 ﻿
 using Discord;
+using Discord.Interactions;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -18,13 +19,13 @@ using System.Threading.Tasks;
 
 namespace Discord_Bot.Commands
 {
-    public class BasicModule : BaseCommandModule
+    public class Misc : BaseCommandModule
     {
         OpenAI openAI = new OpenAI();
         RedditAPi reddit = new RedditAPi();
 
 
-        [Command("chatGPT"), Description("this is chatGPT description")]
+        [Command("chatGPT"), Description("this is chatGPT description"), Aliases( "chatgpt" )]
         /// <summary>
         /// Ask anything to the completion AI of OpenAI and it will respond
         /// <param name="prompt"/> The prompt which will be asked to the AI. Make sure to use "" around your prompt! </param>
@@ -42,8 +43,20 @@ namespace Discord_Bot.Commands
             await ctx.TriggerTypingAsync();
 
             Task<string> result = openAI.Textrequest(prompt, model, temp);
-            Console.WriteLine(result.Result);
-            await ctx.RespondAsync(result.Result);
+            try
+            {
+                Console.WriteLine(result.Result);
+                await ctx.RespondAsync(result.Result);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                if (e.HResult == -2146233088)
+                    await ctx.RespondAsync("Too many requests (aka ya ran out of free requests)");
+                else
+                    await ctx.RespondAsync("An error occured");
+            }
+
         }
 
         
