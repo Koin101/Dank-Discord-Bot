@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord_Bot.Commands;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
+using System.Reflection.Metadata;
 
 namespace Discord_Bot
 {
@@ -58,7 +59,7 @@ namespace Discord_Bot
                 StringPrefixes = new[] { "!" }
             });
             commands.SetHelpFormatter<CustomHelpFormatter>();
-            commands.RegisterCommands<BasicModule>();
+            commands.RegisterCommands<Misc>();
             commands.RegisterCommands<CivRolls>();
             commands.RegisterCommands<LeagueModule>();
 

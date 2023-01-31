@@ -1,5 +1,6 @@
 ﻿
 using Discord;
+using Discord.Interactions;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -22,7 +23,7 @@ using System.Net.Http;
 
 namespace Discord_Bot.Commands
 {
-    public class BasicModule : BaseCommandModule
+    public class Misc : BaseCommandModule
     {
         OpenAI openAI = new OpenAI();
         RedditAPi reddit = new RedditAPi();
@@ -47,8 +48,20 @@ namespace Discord_Bot.Commands
             await ctx.TriggerTypingAsync();
 
             Task<string> result = openAI.Textrequest(prompt, model, temp);
-            Console.WriteLine(result.Result);
-            await ctx.RespondAsync(result.Result);
+            try
+            {
+                Console.WriteLine(result.Result);
+                await ctx.RespondAsync(result.Result);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                if (e.HResult == -2146233088)
+                    await ctx.RespondAsync("Too many requests (aka ya ran out of free requests)");
+                else
+                    await ctx.RespondAsync("An error occured");
+            }
+
         }
 
         
