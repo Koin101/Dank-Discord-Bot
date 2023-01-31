@@ -30,11 +30,27 @@ namespace Discord_Bot
                 Intents = DiscordIntents.All,
                 MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Debug,
                 LogTimestampFormat = "dd MMM yyyy - hh:mm:ss"
-            }); ;
+            }); 
 
             discord.MessageCreated += async (s, e) =>
             {
-                if (e.Author.Username == "maddestofmaxes") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:")); };
+                if (e.Author.Username == "maddestofmaxes") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:")); }
+            };
+
+            discord.MessageReactionRemoved += async (s, e) =>
+            {
+                if (e.Emoji.Name == "\U0001f921") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:")); }
+            };
+
+            discord.MessageReactionRemovedEmoji += async (s, e) =>
+            {
+                if (e.Emoji.Name == "\U0001f921") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:")); }
+            };
+
+            discord.MessageReactionsCleared += async (s, e) =>
+            {
+                
+                await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:"));
             };
 
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
@@ -44,6 +60,7 @@ namespace Discord_Bot
             commands.SetHelpFormatter<CustomHelpFormatter>();
             commands.RegisterCommands<BasicModule>();
             commands.RegisterCommands<CivRolls>();
+            commands.RegisterCommands<LeagueModule>();
 
             
 

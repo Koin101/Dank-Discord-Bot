@@ -8,13 +8,17 @@ using OpenAI.GPT3;
 using OpenAI.GPT3.Managers;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
-
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Net.Http;
 
 namespace Discord_Bot.Commands
 {
@@ -22,8 +26,9 @@ namespace Discord_Bot.Commands
     {
         OpenAI openAI = new OpenAI();
         RedditAPi reddit = new RedditAPi();
-
-
+        GifCreator gifCreator = new GifCreator();
+        HttpClient client = new HttpClient();
+        Stream stream;
         [Command("chatGPT"), Description("this is chatGPT description")]
         /// <summary>
         /// Ask anything to the completion AI of OpenAI and it will respond
@@ -64,8 +69,6 @@ namespace Discord_Bot.Commands
                 Color = DiscordColor.Black,
                 Description = prompt,
                 ImageUrl = result.Result
-
-
             };
             await ctx.RespondAsync(embed:embed);
             
@@ -97,7 +100,83 @@ namespace Discord_Bot.Commands
 
         }
 
-       
+        //TODO convert image to speech bubble thing 
+
+
+        [Command("creategif")]
+        public async Task CreateGif(CommandContext ctx)
+        {
+            try
+            {
+
+                var attachments = ctx.Message.Attachments;
+
+                if (attachments.Count == 0) ctx.RespondAsync("Please attach an image (You can just copy paste the image)");
+
+                for (int i = 0; i < attachments.Count; i++)
+                {
+                    Stream stream = await client.GetStreamAsync(attachments[i].Url);
+
+
+                    Bitmap image = new Bitmap(System.Drawing.Image.FromStream(stream));
+                    //if(image.FrameDimensionsList.Count() > 1)
+                    //{
+                    //    FrameDimension dimension = new FrameDimension(image.FrameDimensionsList[0]);
+                    //};
+                    gifCreator.CreateGifFromImg(image);
+
+                    DiscordMessageBuilder messagefile = new DiscordMessageBuilder();
+
+                    messagefile.AddFile("title.gif", gifCreator.memStream, true);
+
+                    ctx.RespondAsync(messagefile);
+                }
+                
+
+
+            }
+            catch (Exception e)
+            {   
+                Console.WriteLine("\n\n\n\n\n\n\n------------------------------");
+                Console.WriteLine(e.ToString());
+                Console.WriteLine("----------------------------");
+                Console.WriteLine("\n\n\n\n\n");
+                ctx.RespondAsync("I got an error oopsie");
+            }
+
+
+
+        }
+
+        [Command("creategif")]
+        public async Task CreateGif(CommandContext ctx, string imageUrl)
+        {
+            try
+            {
+                client.Dispose();
+                stream = await client.GetStreamAsync(imageUrl);
+                //byte[] imageByte = w.DownloadData(imageUrl);
+
+                //MemoryStream stream = new MemoryStream(imageByte);
+
+                Bitmap image = new Bitmap(System.Drawing.Image.FromStream(stream));
+
+                gifCreator.CreateGifFromImg(image);
+
+                FileStream file2 = new FileStream("Images/output.gif", FileMode.Open);
+                DiscordMessageBuilder messagefile = new DiscordMessageBuilder();
+                messagefile.AddFile(file2);
+
+                ctx.RespondAsync(messagefile);
+                file2.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("----------------------");
+                Console.WriteLine(e);
+            }
+        }
+
     }
 
    
