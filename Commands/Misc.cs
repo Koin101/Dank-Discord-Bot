@@ -132,15 +132,17 @@ namespace Discord_Bot.Commands
 
 
                     Bitmap image = new Bitmap(System.Drawing.Image.FromStream(stream));
-                    //if(image.FrameDimensionsList.Count() > 1)
-                    //{
-                    //    FrameDimension dimension = new FrameDimension(image.FrameDimensionsList[0]);
-                    //};
+
+                    if(attachments[i].MediaType == "gif")
+                    {
+
+                    }
+
                     gifCreator.CreateGifFromImg(image);
 
                     DiscordMessageBuilder messagefile = new DiscordMessageBuilder();
 
-                    messagefile.AddFile("title.gif", gifCreator.memStream, true);
+                    messagefile.AddFile("maxGay.gif", gifCreator.memStream, true);
 
                     ctx.RespondAsync(messagefile);
                 }
@@ -165,28 +167,36 @@ namespace Discord_Bot.Commands
         public async Task CreateGif(CommandContext ctx, string imageUrl)
         {
             try
-            {
-                client.Dispose();
-                stream = await client.GetStreamAsync(imageUrl);
-                //byte[] imageByte = w.DownloadData(imageUrl);
+            {   
 
-                //MemoryStream stream = new MemoryStream(imageByte);
+                Stream stream = await client.GetStreamAsync(imageUrl + ".gif");
 
-                Bitmap image = new Bitmap(System.Drawing.Image.FromStream(stream));
+                //string[] splitUrl = imageUrl.Split('/');
+                //string imageFileType = splitUrl[splitUrl.Length - 1].Split('.')[1];
+                System.Drawing.Image image = System.Drawing.Image.FromStream(stream);
+                System.Drawing.Image image2 = System.Drawing.Image.FromFile("Images/tom-brady-lord-of-the-rings.gif");
 
-                gifCreator.CreateGifFromImg(image);
 
-                FileStream file2 = new FileStream("Images/output.gif", FileMode.Open);
+                //if (imageFileType == "gif")
+                //{
+                gifCreator.AnimatedGifCreator(gifCreator.getFrames(image));
+
+                //}
+
+
                 DiscordMessageBuilder messagefile = new DiscordMessageBuilder();
-                messagefile.AddFile(file2);
+
+                messagefile.AddFile("maxGay.gif", gifCreator.gifStream, true);
 
                 ctx.RespondAsync(messagefile);
-                file2.Close();
             }
             catch (Exception e)
             {
-                Console.WriteLine("----------------------");
-                Console.WriteLine(e);
+                Console.WriteLine("\n\n\n\n\n\n\n------------------------------");
+                Console.WriteLine(e.ToString());
+                Console.WriteLine("----------------------------");
+                Console.WriteLine("\n\n\n\n\n");
+                ctx.RespondAsync("I got an error oopsie");
             }
         }
 

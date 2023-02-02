@@ -31,16 +31,26 @@ namespace Discord_Bot
                 Intents = DiscordIntents.All,
                 MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Debug,
                 LogTimestampFormat = "dd MMM yyyy - hh:mm:ss"
-            }); 
+            });
+
+
 
             discord.MessageCreated += async (s, e) =>
             {
                 if (e.Author.Username == "maddestofmaxes") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:")); }
+
+                string username = e.Author.Username;
+                string message = e.Message.Content.ToLower();
+                if (username == "maddestofmaxes")
+                    await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:"));
+                bool isMaintainer = username == "sonicos1" || username == "Neoblasterz";
+                if ((message == "who asked" || message == "who asked?") && !isMaintainer)
+                    await e.Message.RespondAsync("I did");
             };
 
             discord.MessageReactionRemoved += async (s, e) =>
             {
-                if (e.Emoji.Name == "\U0001f921") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:")); }
+                if (e.Emoji.Name == "\U0001f921" && e.User.Username == "maddestofmaxes") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:")); }
             };
 
             discord.MessageReactionRemovedEmoji += async (s, e) =>
