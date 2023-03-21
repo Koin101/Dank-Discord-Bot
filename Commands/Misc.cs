@@ -9,7 +9,6 @@ using OpenAI.GPT3;
 using OpenAI.GPT3.Managers;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -17,9 +16,9 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.Net.Http;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Discord_Bot.Commands
 {
@@ -131,7 +130,7 @@ namespace Discord_Bot.Commands
                     Stream stream = await client.GetStreamAsync(attachments[i].Url);
 
 
-                    Bitmap image = new Bitmap(System.Drawing.Image.FromStream(stream));
+                    Image<Rgba32> image = SixLabors.ImageSharp.Image.Load<Rgba32>(stream);  
 
                     if(attachments[i].MediaType == "gif")
                     {

@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using KGySoft.Drawing;
-using KGySoft.Drawing.Imaging;
 using AnimatedGif;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Discord_Bot
 {
@@ -24,47 +22,40 @@ namespace Discord_Bot
 
         }
 
-        public void CreateGifFromImg(Bitmap img)
+        public void CreateGifFromImg(Image<Rgba32> img)
         {
-            Bitmap overlay = new Bitmap(Image.FromFile("Images/speechbubble.png"));
+            Image<Rgba32> overlay = Image.Load<Rgba32>("Images/speechbubble.png");
             var imgToGif = RemovePixels(overlay, img);
             imgToGif.SaveAsGif(memStream);
             memStream.Seek(0, SeekOrigin.Begin);
         }
 
-        public static Bitmap ResizeImage(Image image, int width, int height)
+        public static Image<Rgba32> ResizeImage(Image<Rgba32> image, int width, int height)
         {
-            var destRect = new Rectangle(0, 0, width, height / 3);
-            var destImage = new Bitmap(width, height);
+            image.Mutate(x => { x.Resize(width, height, KnownResamplers.NearestNeighbor); });
 
-            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            using (var graphics = Graphics.FromImage(destImage))
-            {
-
-                using (var wrapMode = new ImageAttributes())
-                {
-                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-                }
-            }
-
-            return destImage;
+            return image;
         }
 
-        public static Bitmap RemovePixels(Bitmap overlay, Bitmap background)
+        public static Image<Rgba32> RemovePixels(Image<Rgba32> overlay, Image<Rgba32> background)
         {
-            var resizedOverlay = ResizeImage(overlay, background.Width, background.Height);
+            var width = background.Width;
+            var height = background.Height;
+
+            using Image<Rgba32> resizedOverlay = ResizeImage(overlay, width, height / 3);
 
             for (int i = 0; i < resizedOverlay.Width; i++)
             {
                 for (int j = 0; j < resizedOverlay.Height; j++)
                 {
-                    Color c = resizedOverlay.GetPixel(i, j);
-
-                    if (c.Name == "ff04f404") background.SetPixel(i, j, Color.Transparent);
+                    var pixel = resizedOverlay[i, j];
+                    if (pixel.ToHex() == "04F404FF")
+                    {
+                        background[i, j] = Color.Transparent;
+                    }
                 }
             }
+
 
             return background;
         }
