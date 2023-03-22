@@ -28,7 +28,6 @@ namespace Discord_Bot.Commands
         RedditAPi reddit = new RedditAPi();
         GifCreator gifCreator = new GifCreator();
         HttpClient client = new HttpClient();
-        Stream stream;
         [Command("chatGPT"), Description("this is chatGPT description")]
         /// <summary>
         /// Ask anything to the completion AI of OpenAI and it will respond
@@ -123,7 +122,7 @@ namespace Discord_Bot.Commands
 
                 var attachments = ctx.Message.Attachments;
 
-                if (attachments.Count == 0) ctx.RespondAsync("Please attach an image (You can just copy paste the image)");
+                if (attachments.Count == 0) await ctx.RespondAsync("Please attach an image (You can just copy paste the image)");
 
                 for (int i = 0; i < attachments.Count; i++)
                 {
@@ -132,10 +131,6 @@ namespace Discord_Bot.Commands
 
                     Image<Rgba32> image = SixLabors.ImageSharp.Image.Load<Rgba32>(stream);  
 
-                    if(attachments[i].MediaType == "gif")
-                    {
-
-                    }
 
                     gifCreator.CreateGifFromImg(image);
 
@@ -155,7 +150,7 @@ namespace Discord_Bot.Commands
                 Console.WriteLine(e.ToString());
                 Console.WriteLine("----------------------------");
                 Console.WriteLine("\n\n\n\n\n");
-                ctx.RespondAsync("I got an error oopsie");
+                await ctx.RespondAsync("I got an error oopsie");
             }
 
 
@@ -172,13 +167,13 @@ namespace Discord_Bot.Commands
 
                 //string[] splitUrl = imageUrl.Split('/');
                 //string imageFileType = splitUrl[splitUrl.Length - 1].Split('.')[1];
-                System.Drawing.Image image = System.Drawing.Image.FromStream(stream);
-                System.Drawing.Image image2 = System.Drawing.Image.FromFile("Images/tom-brady-lord-of-the-rings.gif");
+                Image<Rgba32> gif = SixLabors.ImageSharp.Image.Load<Rgba32>(stream);
+                Image<Rgba32> image2 = SixLabors.ImageSharp.Image.Load<Rgba32>("Images/tom-brady-lord-of-the-rings.gif");
 
 
                 //if (imageFileType == "gif")
                 //{
-                gifCreator.AnimatedGifCreator(gifCreator.getFrames(image));
+                gifCreator.AnimatedGifCreator(gif.Frames, gif);
 
                 //}
 
@@ -187,15 +182,17 @@ namespace Discord_Bot.Commands
 
                 messagefile.AddFile("maxGay.gif", gifCreator.gifStream, true);
 
-                ctx.RespondAsync(messagefile);
+                await ctx.RespondAsync(messagefile);
+                
             }
             catch (Exception e)
             {
                 Console.WriteLine("\n\n\n\n\n\n\n------------------------------");
                 Console.WriteLine(e.ToString());
+                Console.WriteLine(e.StackTrace);
                 Console.WriteLine("----------------------------");
                 Console.WriteLine("\n\n\n\n\n");
-                ctx.RespondAsync("I got an error oopsie");
+                await ctx.RespondAsync("I got an error oopsie");
             }
         }
 
