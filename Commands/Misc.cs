@@ -165,24 +165,17 @@ namespace Discord_Bot.Commands
 
                 Stream stream = await client.GetStreamAsync(imageUrl + ".gif");
 
-                //string[] splitUrl = imageUrl.Split('/');
-                //string imageFileType = splitUrl[splitUrl.Length - 1].Split('.')[1];
                 Image<Rgba32> gif = SixLabors.ImageSharp.Image.Load<Rgba32>(stream);
-                Image<Rgba32> image2 = SixLabors.ImageSharp.Image.Load<Rgba32>("Images/tom-brady-lord-of-the-rings.gif");
 
-
-                //if (imageFileType == "gif")
-                //{
+                stream.Dispose();
                 gifCreator.AnimatedGifCreator(gif.Frames, gif);
-
-                //}
-
 
                 DiscordMessageBuilder messagefile = new DiscordMessageBuilder();
 
                 messagefile.AddFile("maxGay.gif", gifCreator.gifStream, true);
 
                 await ctx.RespondAsync(messagefile);
+                gifCreator.gifStream.Dispose();
                 
             }
             catch (Exception e)
@@ -198,6 +191,5 @@ namespace Discord_Bot.Commands
 
     }
 
-   
 
 }

@@ -17,7 +17,7 @@ namespace Discord_Bot
         public int count = 0;
         public bool del = true;
         public MemoryStream memStream = new MemoryStream();
-        public MemoryStream gifStream = new MemoryStream();
+        public MemoryStream gifStream;
         static void Main(string[] args)
         {
 
@@ -90,6 +90,7 @@ namespace Discord_Bot
         {
             try
             {
+                gifStream = new MemoryStream();
                 var width = frames[0].Width;
                 var height = frames[0].Height;
                 using Image<Rgba32> newGif = new Image<Rgba32>(width, height);
@@ -104,7 +105,6 @@ namespace Discord_Bot
                 {
 
                     using ImageFrame<Rgba32> newFrame = RemovePixels(frames[i]);
-                    Console.WriteLine("frame number:" + i + "----" + newFrame[100, 120].ToHex());
                     newGif.Frames.AddFrame(newFrame);
                 }
 
