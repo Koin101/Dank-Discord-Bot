@@ -46,6 +46,7 @@ namespace Discord_Bot
                 bool isMaintainer = username == "sonicos1" || username == "Neoblasterz";
                 if ((message == "who asked" || message == "who asked?") && !isMaintainer)
                     await e.Message.RespondAsync("I did");
+                if (message == "im busy" && username == "maddestofmaxes") await e.Message.RespondAsync("Cap!");
             };
 
             discord.MessageReactionRemoved += async (s, e) =>
