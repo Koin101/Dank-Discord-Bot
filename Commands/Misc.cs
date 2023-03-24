@@ -111,8 +111,6 @@ namespace Discord_Bot.Commands
 
         }
 
-        //TODO convert image to speech bubble thing 
-
 
         [Command("creategif")]
         public async Task CreateGif(CommandContext ctx)
@@ -178,14 +176,25 @@ namespace Discord_Bot.Commands
                 gifCreator.gifStream.Dispose();
                 
             }
+            catch (HttpRequestException error) 
+            {
+                Console.WriteLine("\n\n\n\n\n\n-------------------------");
+                Console.WriteLine(error.ToString());
+                Console.WriteLine(error.StackTrace);
+                Console.WriteLine("\n\n\n\n\n-------------------------");
+                await ctx.RespondAsync("I got an HttpRequestException. \nI might not have permission to acces the gif link.");
+            }
+
             catch (Exception e)
             {
+
+
                 Console.WriteLine("\n\n\n\n\n\n\n------------------------------");
                 Console.WriteLine(e.ToString());
                 Console.WriteLine(e.StackTrace);
                 Console.WriteLine("----------------------------");
                 Console.WriteLine("\n\n\n\n\n");
-                await ctx.RespondAsync("I got an error oopsie");
+                await ctx.RespondAsync("I got an error oopsie, blame auke");
             }
         }
 
