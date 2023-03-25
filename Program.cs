@@ -7,6 +7,9 @@ using Discord_Bot.Commands;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using System.Reflection.Metadata;
+using DSharpPlus.Net;
+using DSharpPlus.Lavalink;
+
 
 namespace Discord_Bot
 {
@@ -33,6 +36,21 @@ namespace Discord_Bot
                 LogTimestampFormat = "dd MMM yyyy - hh:mm:ss"
             });
 
+            var endpoint = new ConnectionEndpoint
+            {
+                Hostname = "127.0.0.1", // From your server configuration.
+                Port = 2333 // From your server configuration
+            };
+
+            var lavalinkConfig = new LavalinkConfiguration
+            {
+                Password = "youshallnotpass", // From your server configuration.
+                RestEndpoint = endpoint,
+                SocketEndpoint = endpoint
+            };
+
+
+            var lavalink = discord.UseLavalink();
 
 
             discord.MessageCreated += async (s, e) =>
@@ -73,10 +91,12 @@ namespace Discord_Bot
             commands.RegisterCommands<Misc>();
             commands.RegisterCommands<CivRolls>();
             commands.RegisterCommands<LeagueModule>();
-
+            commands.RegisterCommands<Music>();
             
 
             await discord.ConnectAsync();
+            await lavalink.ConnectAsync(lavalinkConfig);
+
             await Task.Delay(-1);
         }
     }
