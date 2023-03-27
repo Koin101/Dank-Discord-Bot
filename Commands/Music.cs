@@ -16,29 +16,28 @@ namespace Discord_Bot.Commands
     {
 
         [Command]
-        public async Task Join(CommandContext ctx, DiscordChannel channel)
+        public async Task Join(CommandContext ctx)
         {
             var lava = ctx.Client.GetLavalink();
+            var channel = ctx.Member.VoiceState.Channel;
+
+            
             if (!lava.ConnectedNodes.Any())
             {
                 await ctx.RespondAsync("A connection could not be established, please contact auke");
                 return;
             }
 
-            var node = lava.ConnectedNodes.Values.First();
+            if (channel == null) { await ctx.RespondAsync("You are not connected to a voice channel retard!"); }
 
-            if (channel.Type != ChannelType.Voice)
-            {
-                await ctx.RespondAsync("Not a valid voice channel!");
-                return;
-            }
+            var node = lava.ConnectedNodes.Values.First();
 
             await node.ConnectAsync(channel);
             await ctx.RespondAsync($"Joined {channel.Name}");
         }
 
         [Command]
-        public async Task Leave(CommandContext ctx, DiscordChannel channel)
+        public async Task Leave(CommandContext ctx)
         {
             var lava = ctx.Client.GetLavalink();
             if (!lava.ConnectedNodes.Any())
@@ -46,14 +45,9 @@ namespace Discord_Bot.Commands
                 await ctx.RespondAsync("A connection could not be established, please contact auke");
                 return;
             }
-
+            var channel = ctx.Member.VoiceState.Channel;
             var node = lava.ConnectedNodes.Values.First();
 
-            if (channel.Type != ChannelType.Voice)
-            {
-                await ctx.RespondAsync("Not a valid voice channel.");
-                return;
-            }
 
             var conn = node.GetGuildConnection(channel.Guild);
 
@@ -70,7 +64,8 @@ namespace Discord_Bot.Commands
         [Command]
         public async Task Play(CommandContext ctx, [RemainingText] string search)
         {
-            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            var channel = ctx.Member.VoiceState.Channel;
+            if (ctx.Member.VoiceState == null || channel == null)
             {
                 await ctx.RespondAsync("You are not in a voice channel retard.");
                 return;
@@ -82,8 +77,9 @@ namespace Discord_Bot.Commands
 
             if (conn == null)
             {
-                await ctx.RespondAsync("Lavalink is not connected, blame Auke");
-                return;
+                await node.ConnectAsync(channel);
+                await ctx.RespondAsync($"Connected to {channel.Name}");
+                conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
             }
 
             var loadResult = await node.Rest.GetTracksAsync(search);
