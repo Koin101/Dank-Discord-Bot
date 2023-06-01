@@ -53,7 +53,7 @@ namespace Discord_Bot.Commands
 
             if (conn == null)
             {
-                await ctx.RespondAsync("Lavalink is not connected.");
+                await ctx.RespondAsync("The Bot is not connected.");
                 return;
             }
 
@@ -67,7 +67,7 @@ namespace Discord_Bot.Commands
             var channel = ctx.Member.VoiceState.Channel;
             if (ctx.Member.VoiceState == null || channel == null)
             {
-                await ctx.RespondAsync("You are not in a voice channel retard.");
+                await ctx.RespondAsync("You are not in a voice channel retard!");
                 return;
             }
 

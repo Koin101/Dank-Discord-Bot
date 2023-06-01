@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using System.Diagnostics.Tracing;
 
 namespace Discord_Bot.Commands
 {
@@ -28,6 +29,8 @@ namespace Discord_Bot.Commands
         RedditAPi reddit = new RedditAPi();
         GifCreator gifCreator = new GifCreator();
         HttpClient client = new HttpClient();
+        StableDiffusionApi StableDiffusionApi = new StableDiffusionApi();
+
         [Command("chatGPT"), Description("this is chatGPT description")]
         /// <summary>
         /// Ask anything to the completion AI of OpenAI and it will respond
@@ -196,6 +199,23 @@ namespace Discord_Bot.Commands
                 Console.WriteLine("\n\n\n\n\n");
                 await ctx.RespondAsync("I got an error oopsie, blame auke");
             }
+        }
+
+        [Command("txt2img")]
+        public async Task Txt2Img(CommandContext ctx, string prompt, string negativePrompt="", 
+            int width=512, int height=512, int seed= -1, string samplerName = "DPM++ 2M SDE")
+        {
+            Payload payload = new Payload(prompt, negativePrompt, width, height, seed, samplerName);
+
+            var imageStream = StableDiffusionApi.txt2imgRequest(payload);
+
+            DiscordMessageBuilder messagefile = new DiscordMessageBuilder();
+
+            messagefile.AddFile("maxGay.gif", imageStream, true);
+
+            await ctx.RespondAsync(messagefile);
+            
+            imageStream.Dispose();
         }
 
     }
