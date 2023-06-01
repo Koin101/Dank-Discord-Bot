@@ -9,7 +9,9 @@ using DSharpPlus.Entities;
 using System.Reflection.Metadata;
 using DSharpPlus.Net;
 using DSharpPlus.Lavalink;
-
+using System.Linq;
+using DSharpPlus.Lavalink.Entities;
+using System.Timers;
 
 namespace Discord_Bot
 {
@@ -21,11 +23,22 @@ namespace Discord_Bot
 
         }
 
+        async void TimerEvent(DiscordClient discord)
+        {
+            var guild = await discord.GetGuildAsync(470924483302260746);
+            var bot = await guild.GetMemberAsync(1064300027129905192);
+            await bot.ModifyAsync(x => x.VoiceChannel = null);
+            Console.WriteLine("The bot is disconnected");
+        }
+
         static async Task MainAsync()
         {
+            Timer timer = new(interval: 5000);
             var root = Directory.GetCurrentDirectory();
             var dotenv = Path.Combine(root, ".env");
             DotEnv.Load(dotenv);
+            Program p = new Program();
+
 
             var discord = new DiscordClient(new DiscordConfiguration()
             {
@@ -87,6 +100,34 @@ namespace Discord_Bot
             {
                 StringPrefixes = new[] { "!" }
             });
+
+            discord.VoiceStateUpdated += async (s, e) =>
+            {
+                if (e.User.IsBot) 
+                {
+                    //start timer
+                    timer.Start();                    
+                }
+            };
+
+            timer.Elapsed += async (s, e) =>
+            {
+                Console.WriteLine("Timer finished");
+                p.TimerEvent(discord);
+
+            };
+            //is timer afgelopen en is de bot connected en speelt hij geen muziek. Disconnect the bot
+            if (lavalink.ConnectedNodes.Any())
+            {
+                var lava = discord.GetLavalink();
+                var node = lava.ConnectedNodes.Values.First();
+                var conn = node.GetGuildConnection(discord.Guilds.Values.First());
+                var currentState = conn.CurrentState;
+                if(currentState == null) { await conn.DisconnectAsync(); }
+                
+            }
+
+
             commands.SetHelpFormatter<CustomHelpFormatter>();
             commands.RegisterCommands<Misc>();
             commands.RegisterCommands<CivRolls>();
