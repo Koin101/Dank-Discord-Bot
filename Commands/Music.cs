@@ -14,6 +14,7 @@ namespace Discord_Bot.Commands
 {
     public class Music : BaseCommandModule
     {
+        Queue<LavalinkTrack> musicQueue = new Queue<LavalinkTrack>();
 
         [Command]
         public async Task Join(CommandContext ctx)
@@ -91,11 +92,13 @@ namespace Discord_Bot.Commands
             }
 
             var track = loadResult.Tracks.First();
-
+            
             await conn.PlayAsync(track);
-
+            
             await ctx.RespondAsync($"Now playing {track.Title}!");
         }
+
+        
 
         [Command]
         public async Task Pause(CommandContext ctx)
