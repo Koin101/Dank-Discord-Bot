@@ -28,16 +28,24 @@ namespace Discord_Bot
         {
             client = new HttpClient();
 
-            var response = client.PostAsJsonAsync<Payload>(webUiUrl, payload);
-            
-            var r = response.Result.Content.ReadAsStringAsync().Result;
+            try
+            {
+                var response = client.PostAsJsonAsync<Payload>(webUiUrl, payload);
 
-            ApiObject apiObject = JsonSerializer.Deserialize<ApiObject>(r);
+                var r = response.Result.Content.ReadAsStringAsync().Result;
 
-            var bytes = Convert.FromBase64String(apiObject.images[0]);
-            var contents = new MemoryStream(bytes);
+                ApiObject apiObject = JsonSerializer.Deserialize<ApiObject>(r);
 
-            return contents;
+                var bytes = Convert.FromBase64String(apiObject.images[0]);
+                var contents = new MemoryStream(bytes);
+
+                return contents;
+            }
+            catch (Exception e)
+            {
+                return null;
+                
+            }
             
         }
     }

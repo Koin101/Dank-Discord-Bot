@@ -25,15 +25,16 @@ namespace Discord_Bot
 
         async void TimerEvent(DiscordClient discord)
         {
-            var guild = await discord.GetGuildAsync(470924483302260746);
-            var bot = await guild.GetMemberAsync(1064300027129905192);
+            var guild = await discord.GetGuildAsync(970439295724826704);
+            var bot = await guild.GetMemberAsync(1089649232090234951);
             await bot.ModifyAsync(x => x.VoiceChannel = null);
             Console.WriteLine("The bot is disconnected");
+            
         }
 
         static async Task MainAsync()
         {
-            Timer timer = new(interval: 5000);
+            Timer timer = new(interval: 10000);
             var root = Directory.GetCurrentDirectory();
             var dotenv = Path.Combine(root, ".env");
             DotEnv.Load(dotenv);
@@ -69,7 +70,7 @@ namespace Discord_Bot
             discord.MessageCreated += async (s, e) =>
             {
                 if (e.Author.Username == "maddestofmaxes") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:")); }
-
+                if (e.Author.Username == "sonicos1") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":ping:")); }
                 string username = e.Author.Username;
                 string message = e.Message.Content.ToLower();
                 if (username == "maddestofmaxes")
@@ -101,21 +102,21 @@ namespace Discord_Bot
                 StringPrefixes = new[] { "!" }
             });
 
-            discord.VoiceStateUpdated += async (s, e) =>
-            {
-                if (e.User.IsBot) 
-                {
-                    //start timer
-                    timer.Start();                    
-                }
-            };
+            //discord.VoiceStateUpdated += async (s, e) =>
+            //{
+            //    if (e.User.IsBot) 
+            //    {
+            //        //start timer
+            //        timer.Start();                    
+            //    }
+            //};
 
-            timer.Elapsed += async (s, e) =>
-            {
-                Console.WriteLine("Timer finished");
-                p.TimerEvent(discord);
+            //timer.Elapsed += async (s, e) =>
+            //{
+            //    Console.WriteLine("Timer finished");
+            //    p.TimerEvent(discord);
 
-            };
+            //};
             //is timer afgelopen en is de bot connected en speelt hij geen muziek. Disconnect the bot
             //if (lavalink.ConnectedNodes.Any())
             //{
