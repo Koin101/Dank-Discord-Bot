@@ -20,7 +20,7 @@ namespace Discord_Bot.Commands
         string[] NumberEmojis = new string[] { ":one:", ":two:", ":three:", ":four:", ":five:" };
 
         [Command]
-        public async Task JoinTest(CommandContext ctx)
+        public async Task Join(CommandContext ctx)
         {
             var lava = ctx.Client.GetLavalink();
             
@@ -46,7 +46,7 @@ namespace Discord_Bot.Commands
         }
 
         [Command]
-        public async Task LeaveTest(CommandContext ctx)
+        public async Task Leave(CommandContext ctx)
         {
             var lava = ctx.Client.GetLavalink();
             if (!lava.ConnectedNodes.Any())
@@ -71,7 +71,7 @@ namespace Discord_Bot.Commands
         }
 
         [Command]
-        public async Task PlayTest(CommandContext ctx, [RemainingText] string search)
+        public async Task Play(CommandContext ctx, [RemainingText] string search)
         {
             var voiceState = ctx.Member.VoiceState;
             if (ctx.Member.VoiceState == null)
