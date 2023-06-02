@@ -88,7 +88,7 @@ namespace Discord_Bot.Commands
             if (conn == null)
             {
                 await node.ConnectAsync(channel);
-                await ctx.RespondAsync($"Connected to {channel.Name}");
+                //await ctx.RespondAsync($"Connected to {channel.Name}");
                 conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
             }
 
@@ -107,7 +107,7 @@ namespace Discord_Bot.Commands
 
             embedBuilder.Title = "Search results";
             embedBuilder.Description = "This is the top 5 of songs found. Please respond with the number of the song you want to play";
-            DiscordComponent[] buttonList = new DiscordComponent[10];
+            DiscordComponent[] buttonList = new DiscordComponent[5];
             for (int i = 0; i < tracks.Count; i++)
             {
                 embedBuilder.AddField((i + 1) + ". " + tracks[i].Title, tracks[i].Author);
@@ -129,7 +129,7 @@ namespace Discord_Bot.Commands
             "CancelButton_0",
             null,
             false,
-            new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":x:")));
+            new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":heavy_multiplication_x:")));
 
 
             messageBuilder.AddComponents(cancelButton);
@@ -141,7 +141,6 @@ namespace Discord_Bot.Commands
             {
                 LavalinkTrack track = null;
 
-                await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                 string buttonNr = e.Id.Split('_')[1];
 
                 if (buttonNr == "1") track = tracks[0];
@@ -153,10 +152,16 @@ namespace Discord_Bot.Commands
                     track = tracks[3];
                 else if (buttonNr == "5")
                     track = tracks[4];
+                else if (buttonNr == "0") { 
+                    ctx.RespondAsync("You cancelled the command!");
+                    return; }
 
                 await conn.PlayAsync(track);
 
-                await ctx.RespondAsync($"Now playing {track.Title}!");
+                await e.Interaction.CreateResponseAsync(
+                    InteractionResponseType.UpdateMessage,
+                    new DiscordInteractionResponseBuilder()
+                        .WithContent($"Now playing {track.Title}!"));
             };
                         
 
