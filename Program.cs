@@ -117,15 +117,15 @@ namespace Discord_Bot
 
             };
             //is timer afgelopen en is de bot connected en speelt hij geen muziek. Disconnect the bot
-            if (lavalink.ConnectedNodes.Any())
-            {
-                var lava = discord.GetLavalink();
-                var node = lava.ConnectedNodes.Values.First();
-                var conn = node.GetGuildConnection(discord.Guilds.Values.First());
-                var currentState = conn.CurrentState;
-                if(currentState == null) { await conn.DisconnectAsync(); }
+            //if (lavalink.ConnectedNodes.Any())
+            //{
+            //    var lava = discord.GetLavalink();
+            //    var node = lava.ConnectedNodes.Values.First();
+            //    var conn = node.GetGuildConnection(discord.Guilds.Values.First());
+            //    var currentState = conn.CurrentState;
+            //    if(currentState == null) { await conn.DisconnectAsync(); }
                 
-            }
+            //}
 
 
             commands.SetHelpFormatter<CustomHelpFormatter>();

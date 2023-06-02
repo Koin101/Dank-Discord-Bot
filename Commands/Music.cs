@@ -16,6 +16,13 @@ namespace Discord_Bot.Commands
     {
         Queue<LavalinkTrack> musicQueue = new Queue<LavalinkTrack>();
 
+        public DiscordButtonComponent myButton = new DiscordButtonComponent(
+            ButtonStyle.Primary,
+            "my_very_cool_button",
+            "Very cool button!",
+            false,
+            new DiscordComponentEmoji("😀"));
+
         [Command]
         public async Task Join(CommandContext ctx)
         {
@@ -90,7 +97,26 @@ namespace Discord_Bot.Commands
                 await ctx.RespondAsync($"Track search failed for {search}. Try better or blame Auke.");
                 return;
             }
+            var tracks = loadResult.Tracks.ToList();
 
+            DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder();
+            
+            embedBuilder.Title = "Search results";
+            embedBuilder.Description = "This is the top 5 of songs found. Please respond with the number of the song you want to play";
+            for (int i = 0; i < tracks.Count; i++)
+            {
+                embedBuilder.AddField((i + 1) + ". " + tracks[i].Title, tracks[i].Author);
+                if(i == 4) break;
+            }
+            var messageBuilder = new DiscordMessageBuilder()
+                .AddEmbed(embedBuilder)
+                .AddComponents(myButton);
+            ctx.Client.ComponentInteractionCreated += async (s, e) =>
+            {
+
+            };
+            
+            
             var track = loadResult.Tracks.First();
             
             await conn.PlayAsync(track);
