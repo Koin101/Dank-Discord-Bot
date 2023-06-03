@@ -99,7 +99,7 @@ namespace Discord_Bot
 
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
             {
-                StringPrefixes = new[] { "!" }
+                StringPrefixes = new[] { "!!" }
             });
 
             //discord.VoiceStateUpdated += async (s, e) =>

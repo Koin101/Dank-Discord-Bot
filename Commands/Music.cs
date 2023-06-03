@@ -13,6 +13,7 @@ using DSharpPlus.Lavalink;
 
 namespace Discord_Bot.Commands
 {
+    [RequireOwner]
     public class Music : BaseCommandModule
     {
         Queue<LavalinkTrack> musicQueue = new Queue<LavalinkTrack>();
@@ -153,17 +154,44 @@ namespace Discord_Bot.Commands
                 else if (buttonNr == "5")
                     track = tracks[4];
                 else if (buttonNr == "0") { 
-                    ctx.RespondAsync("You cancelled the command!");
+                    await ctx.RespondAsync("You cancelled the command!");
                     return; }
 
-                await conn.PlayAsync(track);
+                if (conn.CurrentState.CurrentTrack == null) 
+                {
+                    await conn.PlayAsync(track);
 
-                await e.Interaction.CreateResponseAsync(
+                    await e.Interaction.CreateResponseAsync(
                     InteractionResponseType.UpdateMessage,
                     new DiscordInteractionResponseBuilder()
                         .WithContent($"Now playing {track.Title}!"));
+                } 
+                else
+                {
+                    Console.WriteLine(track.Title);
+                    musicQueue.Enqueue(track);
+
+                    await e.Interaction.CreateResponseAsync(
+                    InteractionResponseType.UpdateMessage,
+                    new DiscordInteractionResponseBuilder()
+                        .WithContent($"Put {track.Title} into the queue. It's in {musicQueue.Count}th place."));
+                }                
             };
-                        
+
+            conn.PlaybackFinished += async (s, e) =>
+            {
+                if(musicQueue.TryDequeue(out var nextTrack))
+                {
+                    await conn.PlayAsync(nextTrack);
+
+                }
+                else
+                {
+                    return;
+                }
+
+            };
+
 
         }
 
@@ -196,6 +224,46 @@ namespace Discord_Bot.Commands
 
             await conn.PauseAsync();
 
+        }
+
+        [Command, Description("Skips the currently playing song")]
+        public async Task Skip(CommandContext ctx)
+        {
+            var lava = ctx.Client.GetLavalink();
+            var node = lava.ConnectedNodes.Values.First();
+            var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
+
+            var wasPlaying = conn.CurrentState.CurrentTrack;
+            await conn.StopAsync();
+            if (musicQueue.TryDequeue(out var music))
+            {
+                await conn.PlayAsync(music);
+                await ctx.RespondAsync($"Skipped {wasPlaying.Title} and started playing {music.Title}");
+            }
+            else
+            {
+                await ctx.RespondAsync($"Skipped {wasPlaying.Title}.");
+            }
+        }
+
+        [Command, Aliases("np")]
+        public async Task nowPlaying(CommandContext ctx)
+        {
+            var lava = ctx.Client.GetLavalink();
+            var node = lava.ConnectedNodes.Values.First();
+            var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
+
+            var currentTrack = conn.CurrentState.CurrentTrack;
+            if(currentTrack != null) 
+            {
+                await ctx.RespondAsync($"The current track is {currentTrack.Title} by {currentTrack.Author}");
+
+            }
+            else
+            {
+                await ctx.RespondAsync("No track to skip");
+                return;
+            }
         }
     }
 }
