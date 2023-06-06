@@ -84,24 +84,54 @@ namespace Discord_Bot.Commands
         //TODO Implement league api commands
 
 
-        [Command("SummonorInfo")]
-        public async Task BasicSummonorInfo(CommandContext ctx, string summonorName)
+        public async Task GetSummonerInfo(CommandContext ctx, string summonerName)
         {
-            try
-            {
-                var summonor = api.Summoner.GetSummonerByNameAsync(Region.Euw, summonorName).Result;
-                var name = summonor.Name;
-                var level = summonor.Level;
-                var accountID = summonor.AccountId;
 
-                await ctx.RespondAsync($"{name} is level {level} and has no life.");
-            }
-            catch (Exception e)
-            {
 
-                Console.WriteLine(e);
-                await ctx.RespondAsync("Summonor not found!");
+            string apiKey = Environment.GetEnvironmentVariable("RiotApiKey"); 
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+
+                // Make a request to get summoner info
+                string summonerInfoEndpoint = $"https:/euw1.api.riotgames.com/summoner/v4/summoners/by-name/{summonerName}";
+                HttpResponseMessage response = await client.GetAsync(summonerInfoEndpoint);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Parse the response and extract the summoner info
+                    var summonerInfo = await response.Content.ReadAsAsync<SummonerInfo>();
+
+                    // Process the summoner info as needed
+                    // You can access properties of the SummonerInfo object like summonerInfo.Name, summonerInfo.Level, etc.
+
+                    await ctx.RespondAsync($"Summoner Name: {summonerInfo.Name}\nSummoner Level: {summonerInfo.SummonerLevel}");
+                }
+                else
+                {
+                    await ctx.RespondAsync("Failed to retrieve summoner info from the Riot Games API.");
+                }
             }
         }
+
+        public void GetMatchIds()
+        {
+
+        }
+
     }
+
+    public class SummonerInfo
+    {
+        public string AccountId { get; set; }
+        public int ProfileIconId { get; set; }
+        public long RevisionDate { get; set; }
+        public string Name { get; set; }
+        public string Id { get; set; }
+        public string Puuid { get; set; }
+        public long SummonerLevel { get; set; }
+    }
+
+
 }

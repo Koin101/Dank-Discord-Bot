@@ -153,9 +153,11 @@ namespace Discord_Bot.Commands
                     track = tracks[3];
                 else if (buttonNr == "5")
                     track = tracks[4];
-                else if (buttonNr == "0") { 
+                else if (buttonNr == "0") 
+                { 
                     await ctx.RespondAsync("You cancelled the command!");
-                    return; }
+                    return; 
+                }
 
                 if (conn.CurrentState.CurrentTrack == null) 
                 {

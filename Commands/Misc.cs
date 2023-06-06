@@ -139,7 +139,7 @@ namespace Discord_Bot.Commands
 
                     messagefile.AddFile("maxGay.gif", gifCreator.memStream, true);
 
-                    ctx.RespondAsync(messagefile);
+                   await ctx.RespondAsync(messagefile);
                 }
                 
 
@@ -208,7 +208,7 @@ namespace Discord_Bot.Commands
             Payload payload = new Payload(prompt, negativePrompt, width, height, seed, samplerName);
 
             var imageStream = StableDiffusionApi.txt2imgRequest(payload);
-            if(imageStream == null) { await ctx.RespondAsync("The StableDiffusion API is not online. If u want to use it ping " + ctx.Guild.GetMemberAsync(222675750778699776).Result.Nickname); return; }
+            if(imageStream == null) { await ctx.RespondAsync("The StableDiffusion API is not online. If u want to use it ping " +  ctx.Guild.GetMemberAsync(222675750778699776).Result.Nickname); return; }
             DiscordMessageBuilder messagefile = new DiscordMessageBuilder();
 
             messagefile.AddFile("maxGay.gif", imageStream, true);

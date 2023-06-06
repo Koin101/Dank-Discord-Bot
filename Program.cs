@@ -102,6 +102,8 @@ namespace Discord_Bot
                 StringPrefixes = new[] { "!!" }
             });
 
+
+
             //discord.VoiceStateUpdated += async (s, e) =>
             //{
             //    if (e.User.IsBot) 
