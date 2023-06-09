@@ -19,7 +19,7 @@ namespace Discord_Bot.Commands
         Queue<LavalinkTrack> musicQueue = new Queue<LavalinkTrack>();
 
         string[] NumberEmojis = new string[] { ":one:", ":two:", ":three:", ":four:", ":five:" };
-
+        
         [Command]
         public async Task Join(CommandContext ctx)
         {
