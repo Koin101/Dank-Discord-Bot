@@ -13,7 +13,7 @@ using DSharpPlus.Lavalink;
 
 namespace Discord_Bot.Commands
 {
-    [RequireOwner]
+    
     public class Music : BaseCommandModule
     {
         Queue<LavalinkTrack> musicQueue = new Queue<LavalinkTrack>();

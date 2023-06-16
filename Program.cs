@@ -66,7 +66,6 @@ namespace Discord_Bot
 
             var lavalink = discord.UseLavalink();
 
-
             discord.MessageCreated += async (s, e) =>
             {
                 if (e.Author.Username == "maddestofmaxes") { await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, ":clown:")); }
@@ -134,10 +133,12 @@ namespace Discord_Bot
             commands.RegisterCommands<CivRolls>();
             commands.RegisterCommands<LeagueModule>();
             commands.RegisterCommands<Music>();
+            commands.RegisterCommands<Trolling>();
             
 
             await discord.ConnectAsync();
             await lavalink.ConnectAsync(lavalinkConfig);
+
 
             await Task.Delay(-1);
         }
