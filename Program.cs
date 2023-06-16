@@ -12,6 +12,7 @@ using DSharpPlus.Lavalink;
 using System.Linq;
 using DSharpPlus.Lavalink.Entities;
 using System.Timers;
+using RiotSharp.Endpoints.LeagueEndpoint;
 
 namespace Discord_Bot
 {
@@ -39,8 +40,11 @@ namespace Discord_Bot
             var dotenv = Path.Combine(root, ".env");
             DotEnv.Load(dotenv);
             Program p = new Program();
-
-
+            LeagueModule leagueApi = new LeagueModule();
+            string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
+            leagueApi.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+            Timer leagueTime = new(interval: 1800000);
+            leagueTime.Start();
             var discord = new DiscordClient(new DiscordConfiguration()
             {
                 Token = Environment.GetEnvironmentVariable("DiscordToken"),
@@ -101,6 +105,12 @@ namespace Discord_Bot
                 StringPrefixes = new[] { "!!" }
             });
 
+
+            leagueTime.Elapsed += async (s, e) =>
+            {
+
+            };
+
             //discord.VoiceStateUpdated += async (s, e) =>
             //{
             //    if (e.User.IsBot) 
@@ -126,6 +136,7 @@ namespace Discord_Bot
             //    if(currentState == null) { await conn.DisconnectAsync(); }
                 
             //}
+
 
 
             commands.SetHelpFormatter<CustomHelpFormatter>();

@@ -12,26 +12,18 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using RiotSharp;
-using RiotSharp.Misc;
 using System.Net.Http;
+using RiotSharp.Endpoints.SummonerEndpoint;
 
 namespace Discord_Bot.Commands
 {
     public class LeagueModule : BaseCommandModule
     {
 
-        static async Task Main(string[] args)
-        {
-            using var client = new HttpClient();
-
-            var result = await client.GetAsync("https://127.0.0.1:2999/liveclientdata/allgamedata");
-            Console.WriteLine(result.StatusCode);
-        }
 
 
-
-        RiotApi api = RiotApi.GetDevelopmentInstance("RGAPI-f8465efc-67c0-44b1-984f-8389698d66c1");
+        public HttpClient leagueClient = new HttpClient();
+        
 
         [Command("5Stack"), Description("This command will ping everyone with the @league tag who isn't already in the voice channel.")]
         public async Task ping5Stack(CommandContext ctx)
@@ -83,25 +75,119 @@ namespace Discord_Bot.Commands
 
         //TODO Implement league api commands
 
-
-        [Command("SummonorInfo")]
-        public async Task BasicSummonorInfo(CommandContext ctx, string summonorName)
+        [Command("summonerInfo")]
+        public async Task SummonerInfo(CommandContext ctx, string summonerName)
         {
-            try
-            {
-                var summonor = api.Summoner.GetSummonerByNameAsync(Region.Euw, summonorName).Result;
-                var name = summonor.Name;
-                var level = summonor.Level;
-                var accountID = summonor.AccountId;
+            var summonerInfo = GetSummoner(summonerName);
 
-                await ctx.RespondAsync($"{name} is level {level} and has no life.");
+            await (summonerInfo != null ?  
+                ctx.RespondAsync($"Summoner Name: {summonerInfo.Name}\nSummoner Level: {summonerInfo.SummonerLevel}") 
+                : 
+                ctx.RespondAsync("Summoner not found. Did you spell it correctly?"));
+
+        }
+
+        public SummonerInfo GetSummoner(string username)
+        {
+            string summonerInfoEndpoint = $"https:/euw1.api.riotgames.com/summoner/v4/summoners/by-name/{username}";
+            HttpResponseMessage response = leagueClient.GetAsync(summonerInfoEndpoint).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Parse the response and extract the summoner info
+                var summonerInfo = response.Content.ReadAsAsync<SummonerInfo>().Result;
+
+                return summonerInfo;
+
             }
-            catch (Exception e)
+            else
             {
-
-                Console.WriteLine(e);
-                await ctx.RespondAsync("Summonor not found!");
+                return null;
             }
         }
+
+        public List<string> GetMatchIds(string puuid, long? startTime = null, long? endTime = null, int? queue = null, string? type = null, int? start = null, int? count = null)
+        {
+
+            string Endpoint = $"https:/euw1.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids";
+
+            UriBuilder uriBuilder = new UriBuilder(Endpoint);
+            uriBuilder.Query = 
+                       $"{(startTime != null ? $"&startTime={Uri.EscapeDataString(startTime.ToString())}" : string.Empty)}" +
+                       $"{(endTime != null ? $"&endTime={Uri.EscapeDataString(endTime.ToString())}" : string.Empty)}" +
+                       $"{(queue != null ? $"queue={Uri.EscapeDataString(queue.ToString())}" : string.Empty)}" +
+                       $"{(type != null ? $"type={Uri.EscapeDataString(type.ToString())}" : string.Empty)}" +
+                       $"{(start != null ? $"start={Uri.EscapeDataString(start.ToString())}" : string.Empty)}" +
+                       $"{(count != null ? $"count={Uri.EscapeDataString(count.ToString())}" : string.Empty)}";
+
+            
+
+
+            var response = leagueClient.GetAsync(uriBuilder.Uri).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                var matchids = response.Content.ReadAsAsync<MatchId>().Result;
+                return matchids.MatchIds;
+            }
+            else
+            {
+
+                return null;
+            }
+        }
+
+        public static long ConvertToEpoch(DateTime dateTime)
+        {
+            DateTimeOffset dateTimeOffset = new DateTimeOffset(dateTime);
+            return dateTimeOffset.ToUnixTimeSeconds();
+        }
+
+        public void GetlastMatchData(string username)
+        {
+            string summonerInfoEndpoint = $"https:/euw1.api.riotgames.com/summoner/v4/summoners/by-name/{username}";
+
+            var response = leagueClient.GetAsync(summonerInfoEndpoint).Result;
+
+            DateTime dateNow = DateTime.Now;
+            var dateBefore = dateNow.AddMinutes(-40);
+
+            long startTime = ConvertToEpoch(dateBefore);
+
+            if (response.IsSuccessStatusCode)
+            {
+                SummonerInfo summoner = response.Content.ReadAsAsync<SummonerInfo>().Result;
+
+                var lastMatchIds = GetMatchIds(summoner.Puuid, startTime);
+
+
+            }
+            else
+            {
+
+            }
+
+        }
+
     }
+
+    public class SummonerInfo
+    {
+        public string AccountId { get; set; }
+        public int ProfileIconId { get; set; }
+        public long RevisionDate { get; set; }
+        public string Name { get; set; }
+        public string Id { get; set; }
+        public string Puuid { get; set; }
+        public long SummonerLevel { get; set; }
+    }
+
+    public class MatchId
+    {
+        public List<string> MatchIds { get; set; }
+    }
+
+
+
+
 }
