@@ -13,6 +13,7 @@ using System.Linq;
 using DSharpPlus.Lavalink.Entities;
 using System.Timers;
 using RiotSharp.Endpoints.LeagueEndpoint;
+using KGySoft.CoreLibraries;
 
 namespace Discord_Bot
 {
@@ -36,15 +37,21 @@ namespace Discord_Bot
         static async Task MainAsync()
         {
             Timer timer = new(interval: 10000);
+
             var root = Directory.GetCurrentDirectory();
             var dotenv = Path.Combine(root, ".env");
             DotEnv.Load(dotenv);
+
             Program p = new Program();
+
             LeagueModule leagueApi = new LeagueModule();
+            Music music = new Music();
             string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
             leagueApi.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+
             Timer leagueTime = new(interval: 1800000);
             leagueTime.Start();
+
             var discord = new DiscordClient(new DiscordConfiguration()
             {
                 Token = Environment.GetEnvironmentVariable("DiscordToken"),
@@ -111,6 +118,63 @@ namespace Discord_Bot
 
             };
 
+            if (lavalink.ConnectedNodes.Any())
+            {
+
+                var lava = discord.GetLavalink();
+                var node = lava.ConnectedNodes.Values.First();
+                var conn = node.ConnectedGuilds.Values.First();
+
+                conn.PlaybackFinished += async (s, e) =>
+                {
+                    music.playbackFinished(conn);
+                };
+            }
+
+            discord.ComponentInteractionCreated += async (s, e) =>
+            {
+                var lava = discord.GetLavalink();
+                var node = lava.ConnectedNodes.Values.First();
+                var conn = node.ConnectedGuilds.Values.First();
+
+                string buttonNr = e.Id.Split('_')[1];
+                int trackNr = 0;
+                if (buttonNr == "1") trackNr = 0;
+                else if (buttonNr == "2")
+                    trackNr = 1;
+                else if (buttonNr == "3")
+                    trackNr = 2;
+                else if (buttonNr == "4")
+                    trackNr = 3;
+                else if (buttonNr == "5")
+                    trackNr = 4;
+                else if (buttonNr == "0")
+                {
+                    await e.Message.RespondAsync("You cancelled the command!");
+                    return;
+                }
+
+                (LavalinkTrack track, int? count) = music.AddtoQueue(conn, trackNr).Result;
+
+                if(count is null)
+                {
+                    await e.Interaction.CreateResponseAsync(
+                        InteractionResponseType.UpdateMessage,
+                        new DiscordInteractionResponseBuilder()
+                        .WithContent($"Now playing {track.Title}!"));
+                }
+                else
+                {
+                    await e.Interaction.CreateResponseAsync(
+                        InteractionResponseType.UpdateMessage,
+                        new DiscordInteractionResponseBuilder()
+                        .WithContent($"Put {track.Title} into the queue. It's in {count}th place."));
+                }
+                
+
+                
+            };
+
             //discord.VoiceStateUpdated += async (s, e) =>
             //{
             //    if (e.User.IsBot) 
@@ -144,7 +208,6 @@ namespace Discord_Bot
             commands.RegisterCommands<CivRolls>();
             commands.RegisterCommands<LeagueModule>();
             commands.RegisterCommands<Music>();
-            commands.RegisterCommands<Trolling>();
             
 
             await discord.ConnectAsync();
