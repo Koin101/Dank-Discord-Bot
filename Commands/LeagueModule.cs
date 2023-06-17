@@ -169,6 +169,11 @@ namespace Discord_Bot.Commands
 
         }
 
+        public void GetMatchData(string matchId)
+        {
+
+        }
+
     }
 
     public class SummonerInfo
