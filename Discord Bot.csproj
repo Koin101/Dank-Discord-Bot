@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <RootNamespace>Discord_Bot</RootNamespace>
-    <StartupObject>Discord_Bot.Program</StartupObject>
+    <StartupObject>Discord_Bot.Commands.LeagueModule</StartupObject>
     <UserSecretsId>355e874c-d3bf-41bc-9441-3e1a1aca7a5e</UserSecretsId>
   </PropertyGroup>
 

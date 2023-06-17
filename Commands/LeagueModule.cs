@@ -14,6 +14,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using RiotSharp.Endpoints.SummonerEndpoint;
+using Reddit.Inputs.Search;
+using System.IO;
 
 namespace Discord_Bot.Commands
 {
@@ -23,7 +25,31 @@ namespace Discord_Bot.Commands
 
 
         public HttpClient leagueClient = new HttpClient();
-        
+
+        static void Main(string[] args)
+        {
+            var root = Directory.GetCurrentDirectory();
+            var dotenv = Path.Combine(root, ".env");
+            DotEnv.Load(dotenv);
+            LeagueModule leagueModule = new LeagueModule();
+            string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
+            leagueModule.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+            var summoner = leagueModule.GetSummoner("neoblasterzzz").Result;
+
+            Console.WriteLine(summoner.ToString() ?? "error");
+
+            var matchids = leagueModule.GetMatchIds(summoner.Puuid).Result;
+            if (matchids != null)
+            {
+                Console.WriteLine(matchids);
+            }
+            else
+            {
+                Console.WriteLine("matchids is null");
+            }
+
+        }
+
 
         [Command("5Stack"), Description("This command will ping everyone with the @league tag who isn't already in the voice channel.")]
         public async Task ping5Stack(CommandContext ctx)
@@ -78,7 +104,7 @@ namespace Discord_Bot.Commands
         [Command("summonerInfo")]
         public async Task SummonerInfo(CommandContext ctx, string summonerName)
         {
-            var summonerInfo = GetSummoner(summonerName);
+            var summonerInfo = GetSummoner(summonerName).Result;
 
             await (summonerInfo != null ?  
                 ctx.RespondAsync($"Summoner Name: {summonerInfo.Name}\nSummoner Level: {summonerInfo.SummonerLevel}") 
@@ -87,18 +113,17 @@ namespace Discord_Bot.Commands
 
         }
 
-        public SummonerInfo GetSummoner(string username)
+        public async Task<SummonerInfo> GetSummoner(string username)
         {
-            string summonerInfoEndpoint = $"https:/euw1.api.riotgames.com/summoner/v4/summoners/by-name/{username}";
-            HttpResponseMessage response = leagueClient.GetAsync(summonerInfoEndpoint).Result;
+            string summonerInfoEndpoint = $"https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{username}";
+
+            HttpResponseMessage response = await leagueClient.GetAsync(summonerInfoEndpoint);
 
             if (response.IsSuccessStatusCode)
             {
                 // Parse the response and extract the summoner info
-                var summonerInfo = response.Content.ReadAsAsync<SummonerInfo>().Result;
-
+                var summonerInfo = await response.Content.ReadAsAsync<SummonerInfo>();
                 return summonerInfo;
-
             }
             else
             {
@@ -106,10 +131,11 @@ namespace Discord_Bot.Commands
             }
         }
 
-        public List<string> GetMatchIds(string puuid, long? startTime = null, long? endTime = null, int? queue = null, string? type = null, int? start = null, int? count = null)
+
+        public async  Task<MatchId> GetMatchIds(string puuid, long? startTime = null, long? endTime = null, int? queue = null, string? type = null, int? start = null, int? count = null)
         {
 
-            string Endpoint = $"https:/euw1.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids";
+            string Endpoint = $"https://euw1.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids";
 
             UriBuilder uriBuilder = new UriBuilder(Endpoint);
             uriBuilder.Query = 
@@ -123,12 +149,12 @@ namespace Discord_Bot.Commands
             
 
 
-            var response = leagueClient.GetAsync(uriBuilder.Uri).Result;
+            var response = await leagueClient.GetAsync(uriBuilder.Uri);
 
             if (response.IsSuccessStatusCode)
             {
-                var matchids = response.Content.ReadAsAsync<MatchId>().Result;
-                return matchids.MatchIds;
+                var matchids = await response.Content.ReadAsAsync<MatchId>();
+                return matchids;
             }
             else
             {
@@ -164,7 +190,7 @@ namespace Discord_Bot.Commands
             }
             else
             {
-
+                
             }
 
         }
@@ -185,11 +211,34 @@ namespace Discord_Bot.Commands
         public string Id { get; set; }
         public string Puuid { get; set; }
         public long SummonerLevel { get; set; }
+
+        public override string ToString()
+        {
+            return $"Summoner Name: {Name}\n" +
+                   $"Summoner Level: {SummonerLevel}\n" +
+                   $"Account ID: {AccountId}\n" +
+                   $"Profile Icon ID: {ProfileIconId}\n" +
+                   $"Revision Date: {DateTimeOffset.FromUnixTimeMilliseconds(RevisionDate)}\n" +
+                   $"Summoner ID: {Id}\n" +
+                   $"PUUID: {Puuid}";
+        }
     }
 
     public class MatchId
     {
         public List<string> MatchIds { get; set; }
+
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            foreach (var matchId in MatchIds)
+            {
+                stringBuilder.Append(matchId.ToString());
+            }
+
+            return stringBuilder.ToString();
+        }
     }
 
 
