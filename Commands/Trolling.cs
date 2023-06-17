@@ -15,15 +15,6 @@ namespace Discord_Bot.Commands
     public class Trolling : BaseCommandModule
     {
 
-        [Command]
-        public async Task RotOp(CommandContext ctx)
-        {
-            var user = ctx.User;
-            var channel = ctx.Member.VoiceState.Channel;
-            if (ctx.Member.VoiceState.Channel != null)
-            {
-                
-            }
-        }
+        
     }
 }

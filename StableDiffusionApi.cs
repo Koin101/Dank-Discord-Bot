@@ -28,11 +28,12 @@ namespace Discord_Bot
         {
             client = new HttpClient();
 
-            try
-            {
-                var response = client.PostAsJsonAsync<Payload>(webUiUrl, payload);
 
-                var r = response.Result.Content.ReadAsStringAsync().Result;
+            var response = client.PostAsJsonAsync<Payload>(webUiUrl, payload).Result;
+
+            if(response.IsSuccessStatusCode)
+            {
+                var r = response.Content.ReadAsStringAsync().Result;
 
                 ApiObject apiObject = JsonSerializer.Deserialize<ApiObject>(r);
 
@@ -41,11 +42,9 @@ namespace Discord_Bot
 
                 return contents;
             }
-            catch (Exception e)
-            {
-                return null;
-                
-            }
+            else { return null; }
+            
+
             
         }
     }

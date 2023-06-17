@@ -13,13 +13,14 @@ using DSharpPlus.Lavalink;
 
 namespace Discord_Bot.Commands
 {
-    [RequireOwner]
+    
     public class Music : BaseCommandModule
     {
         Queue<LavalinkTrack> musicQueue = new Queue<LavalinkTrack>();
 
         string[] NumberEmojis = new string[] { ":one:", ":two:", ":three:", ":four:", ":five:" };
-        
+        List<LavalinkTrack> tracksLoadResult = new List<LavalinkTrack>();
+
         [Command]
         public async Task Join(CommandContext ctx)
         {
@@ -100,7 +101,7 @@ namespace Discord_Bot.Commands
                 await ctx.RespondAsync($"Track search failed for {search}. Try better or blame Auke.");
                 return;
             }
-            var tracks = loadResult.Tracks.ToList();
+            tracksLoadResult = loadResult.Tracks.ToList();
 
             var embedBuilder = new DiscordEmbedBuilder();
             var messageBuilder = new DiscordMessageBuilder();
@@ -109,9 +110,9 @@ namespace Discord_Bot.Commands
             embedBuilder.Title = "Search results";
             embedBuilder.Description = "This is the top 5 of songs found. Please respond with the number of the song you want to play";
             DiscordComponent[] buttonList = new DiscordComponent[5];
-            for (int i = 0; i < tracks.Count; i++)
+            for (int i = 0; i < tracksLoadResult.Count; i++)
             {
-                embedBuilder.AddField((i + 1) + ". " + tracks[i].Title, tracks[i].Author);
+                embedBuilder.AddField((i + 1) + ". " + tracksLoadResult[i].Title, tracksLoadResult[i].Author);
 
                 DiscordButtonComponent trackButton = new DiscordButtonComponent(
                     ButtonStyle.Primary,
@@ -137,67 +138,8 @@ namespace Discord_Bot.Commands
             messageBuilder.AddEmbed(embedBuilder.Build());
             await ctx.RespondAsync(messageBuilder);          
 
-
-            ctx.Client.ComponentInteractionCreated += async (s, e) =>
-            {
-                LavalinkTrack track = null;
-
-                string buttonNr = e.Id.Split('_')[1];
-
-                if (buttonNr == "1") track = tracks[0];
-                else if (buttonNr == "2")
-                    track = tracks[1];
-                else if (buttonNr == "3")
-                    track = tracks[2];
-                else if (buttonNr == "4")
-                    track = tracks[3];
-                else if (buttonNr == "5")
-                    track = tracks[4];
-                else if (buttonNr == "0") 
-                { 
-                    await ctx.RespondAsync("You cancelled the command!");
-                    return; 
-                }
-
-                if (conn.CurrentState.CurrentTrack == null) 
-                {
-                    await conn.PlayAsync(track);
-
-                    await e.Interaction.CreateResponseAsync(
-                    InteractionResponseType.UpdateMessage,
-                    new DiscordInteractionResponseBuilder()
-                        .WithContent($"Now playing {track.Title}!"));
-                } 
-                else
-                {
-                    Console.WriteLine(track.Title);
-                    musicQueue.Enqueue(track);
-
-                    await e.Interaction.CreateResponseAsync(
-                    InteractionResponseType.UpdateMessage,
-                    new DiscordInteractionResponseBuilder()
-                        .WithContent($"Put {track.Title} into the queue. It's in {musicQueue.Count}th place."));
-                }                
-            };
-
-            conn.PlaybackFinished += async (s, e) =>
-            {
-                if(musicQueue.TryDequeue(out var nextTrack))
-                {
-                    await conn.PlayAsync(nextTrack);
-
-                }
-                else
-                {
-                    return;
-                }
-
-            };
-
-
         }
-
-        
+               
 
         [Command]
         public async Task Pause(CommandContext ctx)
@@ -265,6 +207,34 @@ namespace Discord_Bot.Commands
             {
                 await ctx.RespondAsync("No track to skip");
                 return;
+            }
+        }
+
+        public async void playbackFinished(LavalinkGuildConnection conn)
+        {
+            if (musicQueue.TryDequeue(out var nextTrack))
+            {
+                await conn.PlayAsync(nextTrack);
+            }
+            else return;
+        }
+
+        public async Task<(LavalinkTrack, int?)> AddtoQueue(LavalinkGuildConnection conn, int trackNr)
+        {
+            var track = tracksLoadResult[trackNr];
+
+            if (conn.CurrentState.CurrentTrack == null)
+            {
+                await conn.PlayAsync(track);
+
+                return (track, null);
+            }
+            else
+            {
+                Console.WriteLine(track.Title);
+                musicQueue.Enqueue(track);
+
+                return (track, musicQueue.Count);
             }
         }
     }
