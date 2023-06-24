@@ -36,7 +36,9 @@ namespace Discord_Bot
 
         static async Task MainAsync()
         {
+            Pickwick pickwick = new Pickwick();
             Timer timer = new(interval: 10000);
+            Timer PickWickTimer = new Timer();
 
             var root = Directory.GetCurrentDirectory();
             var dotenv = Path.Combine(root, ".env");
@@ -51,6 +53,10 @@ namespace Discord_Bot
 
             Timer leagueTime = new(interval: 1800000);
             leagueTime.Start();
+
+            PickWickTimer.AutoReset = true;
+            PickWickTimer.Interval = 86400000;
+            PickWickTimer.Enabled = true;
 
             var discord = new DiscordClient(new DiscordConfiguration()
             {
@@ -109,7 +115,7 @@ namespace Discord_Bot
 
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
             {
-                StringPrefixes = new[] { "!!" }
+                StringPrefixes = new[] { "!" }
             });
 
 
@@ -138,17 +144,8 @@ namespace Discord_Bot
                 var conn = node.ConnectedGuilds.Values.First();
 
                 string buttonNr = e.Id.Split('_')[1];
-                int trackNr = 0;
-                if (buttonNr == "1") trackNr = 0;
-                else if (buttonNr == "2")
-                    trackNr = 1;
-                else if (buttonNr == "3")
-                    trackNr = 2;
-                else if (buttonNr == "4")
-                    trackNr = 3;
-                else if (buttonNr == "5")
-                    trackNr = 4;
-                else if (buttonNr == "0")
+                int trackNr = int.Parse(buttonNr) - 1; 
+                if (trackNr == -1)
                 {
                     await e.Message.RespondAsync("You cancelled the command!");
                     return;
@@ -175,31 +172,14 @@ namespace Discord_Bot
                 
             };
 
-            //discord.VoiceStateUpdated += async (s, e) =>
-            //{
-            //    if (e.User.IsBot) 
-            //    {
-            //        //start timer
-            //        timer.Start();                    
-            //    }
-            //};
+            PickWickTimer.Elapsed += async (s, e) =>
+            {
+                string randomQuote = pickwick.PickRandomQuote();
 
-            //timer.Elapsed += async (s, e) =>
-            //{
-            //    Console.WriteLine("Timer finished");
-            //    p.TimerEvent(discord);
+                var channel = await discord.GetChannelAsync(470924483302260748);
 
-            //};
-            //is timer afgelopen en is de bot connected en speelt hij geen muziek. Disconnect the bot
-            //if (lavalink.ConnectedNodes.Any())
-            //{
-            //    var lava = discord.GetLavalink();
-            //    var node = lava.ConnectedNodes.Values.First();
-            //    var conn = node.GetGuildConnection(discord.Guilds.Values.First());
-            //    var currentState = conn.CurrentState;
-            //    if(currentState == null) { await conn.DisconnectAsync(); }
-                
-            //}
+                await channel.SendMessageAsync(randomQuote);
+            };
 
 
 

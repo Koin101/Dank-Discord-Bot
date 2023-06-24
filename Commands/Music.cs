@@ -16,10 +16,10 @@ namespace Discord_Bot.Commands
     
     public class Music : BaseCommandModule
     {
-        Queue<LavalinkTrack> musicQueue = new Queue<LavalinkTrack>();
+        static Queue<LavalinkTrack> musicQueue = new Queue<LavalinkTrack>();
 
         string[] NumberEmojis = new string[] { ":one:", ":two:", ":three:", ":four:", ":five:" };
-        List<LavalinkTrack> tracksLoadResult = new List<LavalinkTrack>();
+        static List<LavalinkTrack> tracksLoadResult = new List<LavalinkTrack>();
 
         [Command]
         public async Task Join(CommandContext ctx)
@@ -175,7 +175,7 @@ namespace Discord_Bot.Commands
         {
             var lava = ctx.Client.GetLavalink();
             var node = lava.ConnectedNodes.Values.First();
-            var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
+            var conn = node.ConnectedGuilds.Values.First();
 
             var wasPlaying = conn.CurrentState.CurrentTrack;
             await conn.StopAsync();
@@ -195,8 +195,7 @@ namespace Discord_Bot.Commands
         {
             var lava = ctx.Client.GetLavalink();
             var node = lava.ConnectedNodes.Values.First();
-            var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
-
+            var conn = node.ConnectedGuilds.Values.First();
             var currentTrack = conn.CurrentState.CurrentTrack;
             if(currentTrack != null) 
             {
@@ -205,7 +204,7 @@ namespace Discord_Bot.Commands
             }
             else
             {
-                await ctx.RespondAsync("No track to skip");
+                await ctx.RespondAsync("No track playing");
                 return;
             }
         }
@@ -226,7 +225,7 @@ namespace Discord_Bot.Commands
             if (conn.CurrentState.CurrentTrack == null)
             {
                 await conn.PlayAsync(track);
-
+                tracksLoadResult.Clear();
                 return (track, null);
             }
             else
