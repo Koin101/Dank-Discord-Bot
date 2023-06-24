@@ -3,19 +3,15 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using OpenAI.GPT3;
-using OpenAI.GPT3.Managers;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
-using RiotSharp.Endpoints.SummonerEndpoint;
-using Reddit.Inputs.Search;
 using System.IO;
+using Newtonsoft.Json;
+using Discord_Bot.RiotApiClasses;
 
 namespace Discord_Bot.Commands
 {
@@ -34,19 +30,15 @@ namespace Discord_Bot.Commands
             LeagueModule leagueModule = new LeagueModule();
             string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
             leagueModule.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+            leagueModule.leagueClient.DefaultRequestHeaders.Add("Origin", "https://developer.riotgames.com");
             var summoner = leagueModule.GetSummoner("neoblasterzzz").Result;
 
-            Console.WriteLine(summoner.ToString() ?? "error");
+            Console.WriteLine(summoner.ToString());
 
             var matchids = leagueModule.GetMatchIds(summoner.Puuid).Result;
-            if (matchids != null)
-            {
-                Console.WriteLine(matchids);
-            }
-            else
-            {
-                Console.WriteLine("matchids is null");
-            }
+            leagueModule.GetMatchData(matchids.MatchIds[0]);
+
+            //leagueModule.GetlastMatchData("neoblasterzzz");
 
         }
 
@@ -132,10 +124,10 @@ namespace Discord_Bot.Commands
         }
 
 
-        public async  Task<MatchId> GetMatchIds(string puuid, long? startTime = null, long? endTime = null, int? queue = null, string? type = null, int? start = null, int? count = null)
+        public async  Task<MatchId> GetMatchIds(string puuid, long? startTime = null, long? endTime = null, int? queue = null, string type = null, int? start = null, int? count = null)
         {
 
-            string Endpoint = $"https://euw1.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids";
+            string Endpoint = $"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids";
 
             UriBuilder uriBuilder = new UriBuilder(Endpoint);
             uriBuilder.Query = 
@@ -153,12 +145,15 @@ namespace Discord_Bot.Commands
 
             if (response.IsSuccessStatusCode)
             {
-                var matchids = await response.Content.ReadAsAsync<MatchId>();
+                var json = await response.Content.ReadAsStringAsync();
+                var matchList = JsonConvert.DeserializeObject<List<string>>(json);
+                var matchids = new MatchId(){MatchIds = matchList};
                 return matchids;
             }
             else
             {
-
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine(response.StatusCode);
                 return null;
             }
         }
@@ -169,77 +164,51 @@ namespace Discord_Bot.Commands
             return dateTimeOffset.ToUnixTimeSeconds();
         }
 
-        public void GetlastMatchData(string username)
+        public MatchId GetlastMatchData(string username)
         {
-            string summonerInfoEndpoint = $"https:/euw1.api.riotgames.com/summoner/v4/summoners/by-name/{username}";
-
-            var response = leagueClient.GetAsync(summonerInfoEndpoint).Result;
-
+            
             DateTime dateNow = DateTime.Now;
             var dateBefore = dateNow.AddMinutes(-40);
 
             long startTime = ConvertToEpoch(dateBefore);
 
-            if (response.IsSuccessStatusCode)
+ 
+            SummonerInfo summoner = GetSummoner(username).Result;
+
+            var lastMatchIds = GetMatchIds(summoner.Puuid, startTime).Result;
+            
+            Console.WriteLine(lastMatchIds);        
+            
+            return lastMatchIds;
+        }
+
+        public async void GetMatchData(string matchId)
+        {
+            string endpoint = $"https://europe.api.riotgames.com/lol/match/v5/matches/{matchId}";
+
+
+            var response = leagueClient.GetAsync(endpoint).Result;
+
+            if(response.IsSuccessStatusCode)
             {
-                SummonerInfo summoner = response.Content.ReadAsAsync<SummonerInfo>().Result;
+                var json = await response.Content.ReadAsStringAsync();
+                var matchDTo = JsonConvert.DeserializeObject<MatchDto>(json);
 
-                var lastMatchIds = GetMatchIds(summoner.Puuid, startTime);
-
-
+                
             }
             else
             {
-                
+                Console.WriteLine("--------------------");
+                Console.WriteLine(response.StatusCode);
+                return;
             }
-
-        }
-
-        public void GetMatchData(string matchId)
-        {
-
         }
 
     }
 
-    public class SummonerInfo
-    {
-        public string AccountId { get; set; }
-        public int ProfileIconId { get; set; }
-        public long RevisionDate { get; set; }
-        public string Name { get; set; }
-        public string Id { get; set; }
-        public string Puuid { get; set; }
-        public long SummonerLevel { get; set; }
+   
 
-        public override string ToString()
-        {
-            return $"Summoner Name: {Name}\n" +
-                   $"Summoner Level: {SummonerLevel}\n" +
-                   $"Account ID: {AccountId}\n" +
-                   $"Profile Icon ID: {ProfileIconId}\n" +
-                   $"Revision Date: {DateTimeOffset.FromUnixTimeMilliseconds(RevisionDate)}\n" +
-                   $"Summoner ID: {Id}\n" +
-                   $"PUUID: {Puuid}";
-        }
-    }
-
-    public class MatchId
-    {
-        public List<string> MatchIds { get; set; }
-
-        public override string ToString()
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-
-            foreach (var matchId in MatchIds)
-            {
-                stringBuilder.Append(matchId.ToString());
-            }
-
-            return stringBuilder.ToString();
-        }
-    }
+    
 
 
 
