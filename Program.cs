@@ -46,10 +46,10 @@ namespace Discord_Bot
 
             Program p = new Program();
 
-            LeagueModule leagueApi = new LeagueModule();
+            //LeagueModule leagueApi = new LeagueModule();
             Music music = new Music();
             string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
-            leagueApi.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+            //leagueApi.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
 
             Timer leagueTime = new(interval: 1800000);
             leagueTime.Start();
@@ -186,7 +186,7 @@ namespace Discord_Bot
             commands.SetHelpFormatter<CustomHelpFormatter>();
             commands.RegisterCommands<Misc>();
             commands.RegisterCommands<CivRolls>();
-            commands.RegisterCommands<LeagueModule>();
+            //commands.RegisterCommands<LeagueModule>();
             commands.RegisterCommands<Music>();
             
 

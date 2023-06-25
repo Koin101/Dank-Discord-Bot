@@ -33,7 +33,7 @@ namespace Discord_Bot.Commands
             leagueModule.leagueClient.DefaultRequestHeaders.Add("Origin", "https://developer.riotgames.com");
             var summoner = leagueModule.GetSummoner("neoblasterzzz").Result;
 
-            Console.WriteLine(summoner.ToString());
+            //Console.WriteLine(summoner.ToString());
 
             var matchids = leagueModule.GetMatchIds(summoner.Puuid).Result;
             leagueModule.GetMatchData(matchids.MatchIds[0]);

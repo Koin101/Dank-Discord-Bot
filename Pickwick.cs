@@ -14,10 +14,10 @@ namespace Discord_Bot
         string path = $"C:\\Users\\Koen\\source\\repos\\Discord Bot\\bin\\Debug\\net7.0\\pickwick_teatopics.txt\\";
         public List<string> PickWickLines = new List<string>();
         Random random = new Random();
+
         public Pickwick()
         {
             ReadFile(path);
-
             
         }
 
@@ -41,11 +41,12 @@ namespace Discord_Bot
             }
         }
 
-        public string PickRandomQuote(List<string> lines)
+        public string PickRandomQuote()
         {
-            int randomNr = random.Next(0, lines.Count);
 
-            return lines[randomNr];
+            int randomNr = random.Next(0, PickWickLines.Count);
+
+            return PickWickLines[randomNr];
         }
 
 
