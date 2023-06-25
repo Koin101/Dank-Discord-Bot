@@ -22,25 +22,25 @@ namespace Discord_Bot.Commands
 
         public HttpClient leagueClient = new HttpClient();
 
-        static void Main(string[] args)
-        {
-            var root = Directory.GetCurrentDirectory();
-            var dotenv = Path.Combine(root, ".env");
-            DotEnv.Load(dotenv);
-            LeagueModule leagueModule = new LeagueModule();
-            string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
-            leagueModule.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
-            leagueModule.leagueClient.DefaultRequestHeaders.Add("Origin", "https://developer.riotgames.com");
-            var summoner = leagueModule.GetSummoner("neoblasterzzz").Result;
+        //static void Main(string[] args)
+        //{
+        //    var root = Directory.GetCurrentDirectory();
+        //    var dotenv = Path.Combine(root, ".env");
+        //    DotEnv.Load(dotenv);
+        //    LeagueModule leagueModule = new LeagueModule();
+        //    string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
+        //    leagueModule.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+        //    leagueModule.leagueClient.DefaultRequestHeaders.Add("Origin", "https://developer.riotgames.com");
+        //    var summoner = leagueModule.GetSummoner("neoblasterzzz").Result;
 
-            //Console.WriteLine(summoner.ToString());
+        //    //Console.WriteLine(summoner.ToString());
 
-            var matchids = leagueModule.GetMatchIds(summoner.Puuid).Result;
-            leagueModule.GetMatchData(matchids.MatchIds[0]);
+        //    var matchids = leagueModule.GetMatchIds(summoner.Puuid).Result;
+        //    leagueModule.GetMatchData(matchids.MatchIds[0]);
 
-            //leagueModule.GetlastMatchData("neoblasterzzz");
+        //    //leagueModule.GetlastMatchData("neoblasterzzz");
 
-        }
+        //}
 
 
         [Command("5Stack"), Description("This command will ping everyone with the @league tag who isn't already in the voice channel.")]
