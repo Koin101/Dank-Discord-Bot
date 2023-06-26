@@ -51,8 +51,11 @@ namespace Discord_Bot
             string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
             leagueApi.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
 
-            Timer leagueTime = new(interval: 1800000);
+            Timer leagueTime = new(interval: 360000);
+            leagueTime.Enabled = true;
+            leagueTime.AutoReset = true;
             leagueTime.Start();
+
 
             PickWickTimer.AutoReset = true;
             PickWickTimer.Interval = 86400000;
@@ -121,7 +124,7 @@ namespace Discord_Bot
 
             leagueTime.Elapsed += async (s, e) =>
             {
-
+                
             };
 
             if (lavalink.ConnectedNodes.Any())
