@@ -121,6 +121,7 @@ namespace Discord_Bot
 
             leagueTime.Elapsed += async (s, e) =>
             {
+                var channel = await discord.GetChannelAsync(572581995276664838);
 
             };
 
@@ -131,9 +132,9 @@ namespace Discord_Bot
                 var node = lava.ConnectedNodes.Values.First();
                 var conn = node.ConnectedGuilds.Values.First();
 
-                conn.PlaybackFinished += async (s, e) =>
-                {
+                conn.PlaybackFinished += (s, e) => {
                     music.playbackFinished(conn);
+                    return Task.CompletedTask;
                 };
             }
 
