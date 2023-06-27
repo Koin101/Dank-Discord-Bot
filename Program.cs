@@ -14,6 +14,7 @@ using DSharpPlus.Lavalink.Entities;
 using System.Timers;
 using RiotSharp.Endpoints.LeagueEndpoint;
 using KGySoft.CoreLibraries;
+using KGySoft.ComponentModel;
 
 namespace Discord_Bot
 {
@@ -48,10 +49,11 @@ namespace Discord_Bot
 
             LeagueModule leagueApi = new LeagueModule();
             Music music = new Music();
-            string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
-            leagueApi.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+            //string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
+            //leagueApi.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+            //leagueApi.leagueClient.DefaultRequestHeaders.Add("Origin", "https://developer.riotgames.com");
 
-            Timer leagueTime = new(interval: 360000);
+            Timer leagueTime = new(interval: 3600000); 
             leagueTime.Enabled = true;
             leagueTime.AutoReset = true;
             leagueTime.Start();
@@ -124,7 +126,15 @@ namespace Discord_Bot
 
             leagueTime.Elapsed += async (s, e) =>
             {
-                
+                var channel = await discord.GetChannelAsync(470924483302260748);
+
+                var embedGregoor = leagueApi.GetLastMatchFromSummonorTimerEvent("Gr3goor");
+                if(embedGregoor != null) await channel.SendMessageAsync(embedGregoor);
+
+                var embedMax = leagueApi.GetLastMatchFromSummonorTimerEvent("madismax");
+                if(embedMax != null) await channel.SendMessageAsync(embedMax);
+                var channel2 = await discord.GetChannelAsync(1064318602582446110);
+                await channel2.SendMessageAsync("Timer event activated");
             };
 
             if (lavalink.ConnectedNodes.Any())
@@ -189,7 +199,7 @@ namespace Discord_Bot
             commands.SetHelpFormatter<CustomHelpFormatter>();
             commands.RegisterCommands<Misc>();
             commands.RegisterCommands<CivRolls>();
-            //commands.RegisterCommands<LeagueModule>();
+            commands.RegisterCommands<LeagueModule>();
             commands.RegisterCommands<Music>();
             
 
