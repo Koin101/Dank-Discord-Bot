@@ -12,6 +12,9 @@ using System.Net.Http;
 using System.IO;
 using Newtonsoft.Json;
 using Discord_Bot.RiotApiClasses;
+using RiotSharp.Endpoints.TeamEndpoint;
+using Microsoft.VisualBasic;
+using KGySoft.CoreLibraries;
 
 namespace Discord_Bot.Commands
 {
@@ -20,27 +23,37 @@ namespace Discord_Bot.Commands
 
 
 
-        public HttpClient leagueClient = new HttpClient();
+        public static HttpClient leagueClient = new HttpClient();
 
-        //static void Main(string[] args)
-        //{
-        //    var root = Directory.GetCurrentDirectory();
-        //    var dotenv = Path.Combine(root, ".env");
-        //    DotEnv.Load(dotenv);
-        //    LeagueModule leagueModule = new LeagueModule();
-        //    string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
-        //    leagueModule.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
-        //    leagueModule.leagueClient.DefaultRequestHeaders.Add("Origin", "https://developer.riotgames.com");
-        //    var summoner = leagueModule.GetSummoner("neoblasterzzz").Result;
+        public LeagueModule()
+        {
+            string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
+            if (!leagueClient.DefaultRequestHeaders.TryGetValues("X-Riot-Token", out _))
+            {
+                leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+                leagueClient.DefaultRequestHeaders.Add("Origin", "https://developer.riotgames.com");
+            }
 
-        //    //Console.WriteLine(summoner.ToString());
+        }
 
-        //    var matchids = leagueModule.GetMatchIds(summoner.Puuid).Result;
-        //    leagueModule.GetMatchData(matchids.MatchIds[0]);
+        static void Main(string[] args)
+        {
+            var root = Directory.GetCurrentDirectory();
+            var dotenv = Path.Combine(root, ".env");
+            DotEnv.Load(dotenv);
+            LeagueModule leagueModule = new LeagueModule();
+            
+            var summoner = leagueModule.GetSummoner("neoblasterzzz").Result;
 
-        //    //leagueModule.GetlastMatchData("neoblasterzzz");
 
-        //}
+            Console.WriteLine(summoner.ToString());
+
+            //var matchids = leagueModule.GetMatchIds(summoner.Puuid).Result;
+            //leagueModule.GetMatchData(matchids.MatchIds[0]);
+
+            //leagueModule.GetlastMatchData("neoblasterzzz");
+
+        }
 
 
         [Command("5Stack"), Description("This command will ping everyone with the @league tag who isn't already in the voice channel.")]
@@ -109,6 +122,9 @@ namespace Discord_Bot.Commands
         {
             string summonerInfoEndpoint = $"https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{username}";
 
+            //string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
+            //leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
+            //leagueClient.DefaultRequestHeaders.Add("Origin", "https://developer.riotgames.com");
             HttpResponseMessage response = await leagueClient.GetAsync(summonerInfoEndpoint);
 
             if (response.IsSuccessStatusCode)
@@ -128,7 +144,7 @@ namespace Discord_Bot.Commands
         {
 
             string Endpoint = $"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids";
-
+           
             UriBuilder uriBuilder = new UriBuilder(Endpoint);
             uriBuilder.Query = 
                        $"{(startTime != null ? $"&startTime={Uri.EscapeDataString(startTime.ToString())}" : string.Empty)}" +
@@ -164,11 +180,11 @@ namespace Discord_Bot.Commands
             return dateTimeOffset.ToUnixTimeSeconds();
         }
 
-        public MatchId GetlastMatchData(string username)
+        public MatchId GetlastMatchId(string username)
         {
             
             DateTime dateNow = DateTime.Now;
-            var dateBefore = dateNow.AddMinutes(-40);
+            var dateBefore = dateNow.AddMinutes(-60);
 
             long startTime = ConvertToEpoch(dateBefore);
 
@@ -177,12 +193,12 @@ namespace Discord_Bot.Commands
 
             var lastMatchIds = GetMatchIds(summoner.Puuid, startTime).Result;
             
-            Console.WriteLine(lastMatchIds);        
+            //Console.WriteLine(lastMatchIds);        
             
             return lastMatchIds;
         }
 
-        public async void GetMatchData(string matchId)
+        public async Task<MatchDto> GetMatchData(string matchId)
         {
             string endpoint = $"https://europe.api.riotgames.com/lol/match/v5/matches/{matchId}";
 
@@ -192,7 +208,7 @@ namespace Discord_Bot.Commands
             if(response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var matchDTo = JsonConvert.DeserializeObject<MatchDto>(json);
+                return JsonConvert.DeserializeObject<MatchDto>(json);
 
                 
             }
@@ -200,8 +216,96 @@ namespace Discord_Bot.Commands
             {
                 Console.WriteLine("--------------------");
                 Console.WriteLine(response.StatusCode);
-                return;
+                return null;
             }
+        }
+
+        public DiscordEmbed CreateLeagueEmbed(MatchDto match, string username)
+        {
+            InfoDto info = match.Info;
+            string surrender, outcome;
+            ParticipantDto participant = info.participants.Find(x => x.SummonerName.ToLower() == username.ToLower());
+
+            (long matchMinutes, long matchSeconds) = GetMinutesAndSeconds((long) info.gameDuration);
+            (long DeathMinutes, long DeathSeconds) = GetMinutesAndSeconds((long) participant.TotalTimeSpentDead);
+            if (participant.Win) outcome = "won";
+            else outcome = "lost";
+            var gameMode = info.gameMode;
+            string position = " in " + participant.teamPosition;
+            if (gameMode == "ARAM") position = "";
+            if (participant.GameEndedInEarlySurrender) surrender = $"Game ended with an early surrender" + "\n";
+            else if (participant.GameEndedInSurrender) surrender = $"Game ended with a surrender" + "\n";
+            else surrender = "";
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append($"Bro was playing {participant.championName} {position} \n");
+            stringBuilder.Append($"The match took {matchMinutes}:{matchSeconds}. \n");
+            stringBuilder.Append(surrender);
+            stringBuilder.Append($"This guy spent {DeathMinutes}:{DeathSeconds} dead which is {((double) participant.TotalTimeSpentDead / (double) info.gameDuration * 100).ToString("0.00")}% of the total game time");
+
+
+
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder
+            {
+                Color = DiscordColor.Gold,
+                Title = $"Guys, {username} {outcome} his last {gameMode} match! ",
+                Description = stringBuilder.ToString(),
+            };
+            embed.AddField("Kills", participant.Kills.ToString(), true);
+            embed.AddField("Deaths", participant.Deaths.ToString(), true);
+            embed.AddField("Assists", participant.assists.ToString(), true);
+
+            embed.AddField("CS", participant.TotalMinionsKilled.ToString(), true);
+            embed.AddField("Total damage dealt to champions", participant.TotalDamageDealtToChampions.ToString(), true);
+            embed.AddField("Gold earned", participant.GoldEarned.ToString(), true);
+
+            return embed;
+        }
+
+        [Command("lm")]
+        public async Task GetLastMatchFromSummoner(CommandContext ctx, string username)
+        {
+            MatchId matchId = GetlastMatchId(username);
+
+            if(matchId.MatchIds.Count > 0)
+            {
+                string lastMatchId = matchId.MatchIds[0];
+
+                MatchDto matchData = GetMatchData(lastMatchId).Result;
+
+                await ctx.RespondAsync(CreateLeagueEmbed(matchData, username));
+            }
+            else
+            {
+                await ctx.RespondAsync("No match in the last hour.");
+            }
+
+        }
+
+        public DiscordEmbed GetLastMatchFromSummonorTimerEvent(string username)
+        {
+            MatchId matchId = GetlastMatchId(username);
+
+            if (matchId.MatchIds.Count > 0)
+            {
+                string lastMatchId = matchId.MatchIds[0];
+
+                MatchDto matchData = GetMatchData(lastMatchId).Result;
+
+                return CreateLeagueEmbed(matchData, username);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static (long minutes, long seconds) GetMinutesAndSeconds(long totalSeconds)
+        {
+            long minutes = totalSeconds / 60;
+            long seconds = totalSeconds % 60;
+
+            return (minutes, seconds);
         }
 
     }
