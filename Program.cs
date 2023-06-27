@@ -133,8 +133,6 @@ namespace Discord_Bot
 
                 var embedMax = leagueApi.GetLastMatchFromSummonorTimerEvent("madismax");
                 if(embedMax != null) await channel.SendMessageAsync(embedMax);
-                var channel2 = await discord.GetChannelAsync(1064318602582446110);
-                await channel2.SendMessageAsync("Timer event activated");
             };
 
             if (lavalink.ConnectedNodes.Any())
