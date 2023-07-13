@@ -197,7 +197,7 @@ namespace Discord_Bot.Commands
                 Console.WriteLine(e.StackTrace);
                 Console.WriteLine("----------------------------");
                 Console.WriteLine("\n\n\n\n\n");
-                await ctx.RespondAsync("I got an error oopsie, blame auke");
+                await ctx.RespondAsync("I got an error oopsie, blame Koen");
             }
         }
 

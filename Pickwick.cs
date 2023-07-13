@@ -5,7 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Threading;
+using DSharpPlus;
+using System.Timers;
 
 namespace Discord_Bot
 {
@@ -13,13 +14,32 @@ namespace Discord_Bot
     {
         List<string> pickWickLines = new List<string>();
         Random random = new Random();
-
-        public Pickwick()
+        DiscordClient discord;
+        public Pickwick(DiscordClient discord)
         {
+            this.discord = discord;
             string root = Directory.GetCurrentDirectory();
             string path = Path.Combine(root, "pickwick_teatopics.txt");
             ReadFile(path);
-            
+        }
+
+        public void Init()
+        {
+            Timer PickWickTimer = new Timer();
+        
+        
+            PickWickTimer.AutoReset = true;
+            PickWickTimer.Interval = 86400000;
+            PickWickTimer.Enabled = true;
+            PickWickTimer.Elapsed += async (s, e) =>
+            {
+                string randomQuote = PickRandomQuote();
+
+                var channel = await discord.GetChannelAsync(470924483302260748);
+
+                await channel.SendMessageAsync(randomQuote);
+            };
+
         }
 
         public void ReadFile(string path)
