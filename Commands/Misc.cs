@@ -20,6 +20,7 @@ using System.Net.Http;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Diagnostics.Tracing;
+using SixLabors.ImageSharp.Formats;
 
 namespace Discord_Bot.Commands
 {
@@ -165,7 +166,6 @@ namespace Discord_Bot.Commands
             {   
 
                 Stream stream = await client.GetStreamAsync(imageUrl + ".gif");
-
                 Image<Rgba32> gif = SixLabors.ImageSharp.Image.Load<Rgba32>(stream);
 
                 stream.Dispose();

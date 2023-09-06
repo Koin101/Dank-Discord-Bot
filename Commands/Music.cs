@@ -10,6 +10,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
+using SixLabors.ImageSharp.Processing.Processors.Transforms;
 
 namespace Discord_Bot.Commands
 {
@@ -20,6 +21,8 @@ namespace Discord_Bot.Commands
 
         string[] NumberEmojis = new string[] { ":one:", ":two:", ":three:", ":four:", ":five:" };
         static List<LavalinkTrack> tracksLoadResult = new List<LavalinkTrack>();
+        static bool isPlaying = false;
+        static LavalinkTrack currentTrack = null;
 
         [Command]
         public async Task Join(CommandContext ctx)
@@ -160,7 +163,7 @@ namespace Discord_Bot.Commands
                 return;
             }
 
-            if (conn.CurrentState.CurrentTrack == null)
+            if (!isPlaying)
             {
                 await ctx.RespondAsync("There are no tracks loaded.");
                 return;
@@ -177,7 +180,7 @@ namespace Discord_Bot.Commands
             var node = lava.ConnectedNodes.Values.First();
             var conn = node.ConnectedGuilds.Values.First();
 
-            var wasPlaying = conn.CurrentState.CurrentTrack;
+            var wasPlaying = currentTrack;
             await conn.StopAsync();
             if (musicQueue.TryDequeue(out var music))
             {
@@ -187,17 +190,19 @@ namespace Discord_Bot.Commands
             else
             {
                 await ctx.RespondAsync($"Skipped {wasPlaying.Title}.");
+                isPlaying = false;
+                currentTrack = null;
             }
         }
 
         [Command, Aliases("np")]
         public async Task nowPlaying(CommandContext ctx)
         {
-            var lava = ctx.Client.GetLavalink();
-            var node = lava.ConnectedNodes.Values.First();
-            var conn = node.ConnectedGuilds.Values.First();
-            var currentTrack = conn.CurrentState.CurrentTrack;
-            if(currentTrack != null) 
+            //var lava = ctx.Client.GetLavalink();
+            //var node = lava.ConnectedNodes.Values.First();
+            //var conn = node.ConnectedGuilds.Values.First();
+            //var currentTrack = conn.CurrentState.CurrentTrack;
+            if(isPlaying) 
             {
                 await ctx.RespondAsync($"The current track is {currentTrack.Title} by {currentTrack.Author}");
 
@@ -214,23 +219,30 @@ namespace Discord_Bot.Commands
             if (musicQueue.TryDequeue(out var nextTrack))
             {
                 await conn.PlayAsync(nextTrack);
+                currentTrack = nextTrack;
             }
-            else return;
+            else
+            {
+                isPlaying = false;
+                currentTrack = null;
+                return;
+            };
         }
 
         public async Task<(LavalinkTrack, int?)> AddtoQueue(LavalinkGuildConnection conn, int trackNr)
         {
             var track = tracksLoadResult[trackNr];
 
-            if (conn.CurrentState.CurrentTrack == null)
+            if (!isPlaying)
             {
                 await conn.PlayAsync(track);
+                currentTrack = track;
+                isPlaying = true;
                 tracksLoadResult.Clear();
                 return (track, null);
             }
             else
             {
-                Console.WriteLine(track.Title);
                 musicQueue.Enqueue(track);
 
                 return (track, musicQueue.Count);
