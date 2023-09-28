@@ -57,7 +57,10 @@ public class Bot
             SocketEndpoint = endpoint
         };
         lavalink = discord.UseLavalink();
-        
+
+        await discord.ConnectAsync();
+        await lavalink.ConnectAsync(lavalinkConfig);
+
         funnyReactions();
         funnyReplies();
         registerCommands();
@@ -66,40 +69,26 @@ public class Bot
         Pickwick pickwick = new Pickwick(discord);
         pickwick.Init();
 
-        await discord.ConnectAsync();
-        await lavalink.ConnectAsync(lavalinkConfig);
 
         await Task.Delay(-1);
     }
-    //TODO: deprecated?
-    /// <summary>
-    /// I dont know what this does
-    /// </summary>
-    /// <param name="discord"></param>
-    async void TimerEvent(DiscordClient discord)
-    {
-        var guild = await discord.GetGuildAsync(970439295724826704);
-        var bot = await guild.GetMemberAsync(1089649232090234951);
-        await bot.ModifyAsync(x => x.VoiceChannel = null);
-        Console.WriteLine("The bot is disconnected");
-            
-    }
+
     /// <summary>
     /// I don't know what this does
     /// </summary>
     private void musicShit()
     {
         Music music = new Music();
+        var test = lavalink.GetIdealNodeConnection();
 
         if (lavalink.ConnectedNodes.Any())
         {
 
             var lava = discord.GetLavalink();
             var node = lava.ConnectedNodes.Values.First();
-            var conn = node.ConnectedGuilds.Values.First();
-
-            conn.PlaybackFinished += (s, e) => {
-                music.playbackFinished(conn);
+            
+            node.PlaybackFinished += (s, e) => {
+                music.playbackFinished(node);
                 return Task.CompletedTask;
             };
         }

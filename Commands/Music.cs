@@ -54,6 +54,7 @@ namespace Discord_Bot.Commands
         public async Task Leave(CommandContext ctx)
         {
             var lava = ctx.Client.GetLavalink();
+
             if (!lava.ConnectedNodes.Any())
             {
                 await ctx.RespondAsync("A connection could not be established, please contact auke");
@@ -89,7 +90,7 @@ namespace Discord_Bot.Commands
             var lava = ctx.Client.GetLavalink();
             var node = lava.ConnectedNodes.Values.First();
             var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
-
+            
             if (conn == null)
             {
                 await node.ConnectAsync(channel);
@@ -185,6 +186,7 @@ namespace Discord_Bot.Commands
             if (musicQueue.TryDequeue(out var music))
             {
                 await conn.PlayAsync(music);
+                currentTrack = music;
                 await ctx.RespondAsync($"Skipped {wasPlaying.Title} and started playing {music.Title}");
             }
             else
@@ -214,8 +216,11 @@ namespace Discord_Bot.Commands
             }
         }
 
-        public async void playbackFinished(LavalinkGuildConnection conn)
+        public async void playbackFinished(LavalinkNodeConnection node)
         {
+
+            var conn = node.ConnectedGuilds.Values.First();
+
             if (musicQueue.TryDequeue(out var nextTrack))
             {
                 await conn.PlayAsync(nextTrack);
