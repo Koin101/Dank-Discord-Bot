@@ -21,7 +21,7 @@ namespace Discord_Bot.Commands
 
         string[] NumberEmojis = new string[] { ":one:", ":two:", ":three:", ":four:", ":five:" };
         static List<LavalinkTrack> tracksLoadResult = new List<LavalinkTrack>();
-        static bool isPlaying = false;
+        bool isPlaying = false;
         static LavalinkTrack currentTrack = null;
 
         [Command]
@@ -177,24 +177,34 @@ namespace Discord_Bot.Commands
         [Command, Description("Skips the currently playing song")]
         public async Task Skip(CommandContext ctx)
         {
+
             var lava = ctx.Client.GetLavalink();
             var node = lava.ConnectedNodes.Values.First();
             var conn = node.ConnectedGuilds.Values.First();
 
             var wasPlaying = currentTrack;
-            await conn.StopAsync();
-            if (musicQueue.TryDequeue(out var music))
+
+            TimeSpan songLength = currentTrack.Length;
+
+
+            if (musicQueue.Count > 0)
             {
-                await conn.PlayAsync(music);
-                currentTrack = music;
-                await ctx.RespondAsync($"Skipped {wasPlaying.Title} and started playing {music.Title}");
+
+                TimeSpan oneSeconds = new TimeSpan(0, 0, 1);
+                await conn.SeekAsync(songLength - oneSeconds);
+
+
+                await ctx.RespondAsync($"Skipped {wasPlaying.Title} and started playing {musicQueue.First().Title}");
+
             }
             else
             {
+                await conn.SeekAsync(songLength);
                 await ctx.RespondAsync($"Skipped {wasPlaying.Title}.");
                 isPlaying = false;
                 currentTrack = null;
             }
+
         }
 
         [Command, Aliases("np")]
@@ -204,7 +214,7 @@ namespace Discord_Bot.Commands
             //var node = lava.ConnectedNodes.Values.First();
             //var conn = node.ConnectedGuilds.Values.First();
             //var currentTrack = conn.CurrentState.CurrentTrack;
-            if(isPlaying) 
+            if(currentTrack != null) 
             {
                 await ctx.RespondAsync($"The current track is {currentTrack.Title} by {currentTrack.Author}");
 
@@ -225,6 +235,7 @@ namespace Discord_Bot.Commands
             {
                 await conn.PlayAsync(nextTrack);
                 currentTrack = nextTrack;
+                isPlaying = true;
             }
             else
             {
