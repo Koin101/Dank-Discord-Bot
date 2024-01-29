@@ -10,6 +10,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
+using KGySoft.CoreLibraries;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
 
 namespace Discord_Bot.Commands
@@ -226,9 +227,27 @@ namespace Discord_Bot.Commands
             }
         }
 
+        [Command]
+        public async Task reset(CommandContext ctx)
+        {
+            await ctx.RespondAsync("Clearing Queue and stopping music player!");
+            var lava = ctx.Client.GetLavalink();
+            var node = lava.ConnectedNodes.Values.First();
+            var conn = node.ConnectedGuilds.Values.First();
+
+            musicQueue.Clear();
+            await Skip(ctx);
+            await conn.DisconnectAsync();
+            currentTrack = null;
+            tracksLoadResult.Clear();
+            isPlaying = false;
+            await ctx.RespondAsync("Reset done");
+
+        }
+
         public async void playbackFinished(LavalinkNodeConnection node)
         {
-
+            if (node.ConnectedGuilds.Values.IsNullOrEmpty()) return;
             var conn = node.ConnectedGuilds.Values.First();
 
             if (musicQueue.TryDequeue(out var nextTrack))
@@ -264,5 +283,7 @@ namespace Discord_Bot.Commands
                 return (track, musicQueue.Count);
             }
         }
+        
+        
     }
 }

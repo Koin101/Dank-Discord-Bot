@@ -2,6 +2,9 @@
 using DSharpPlus.CommandsNext.Attributes;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,16 +12,10 @@ namespace Discord_Bot.Commands
 {
 	public class CivRolls : BaseCommandModule
 	{
-		string[] civs =
-			{"American", "Arabian", "Assyrian", "Austrian", "Aztec",
-			"Babylonian", "Brazilian", "Byzantine", "Carthaginian", "Celtic",
-			"CCP", "Danish", "VOC", "Egyptian", "Bri'ish",
-			"Ethiopian", "French", "Germ*n", "Greek", "Hunnic",
-			"Incan", "Ghandi", "Max's Homeland", "Iroquois", "Weebshit",
-			"Korean", "Mayan", "Wollah", "Ottoman", "Persian",
-			"Polish (ew)", "Polynesian", "Portuguese", "Roman", "vodka",
-			"Shoshone", "Siamese", "Songhai", "Spanish", "Swedish twink",
-			"HAHA VENETIE", "Zulu" };
+		private static string root = Directory.GetCurrentDirectory();
+		private static string path = Path.Combine(root, "CivRolls.txt");
+		private string[] civs = LoadCivFile(path);
+		
 		Dictionary<ulong, int[]> rolledCivs = new Dictionary<ulong, int[]>();
 		private Random random = new Random();
 
@@ -83,6 +80,19 @@ namespace Discord_Bot.Commands
 				message += "\n-" + civs[indexes[i]];
 
 			await ctx.RespondAsync(message);
+		}
+
+		public static string[] LoadCivFile(string path)
+		{
+			List<string> civss = new List<string>();
+			var lines = File.ReadLines(path);
+			foreach (var line in lines)
+			{
+				string civ = line.Split(" ")[1];
+				civss.Add(civ);
+			}
+
+			return civss.ToArray();
 		}
 	}
 	//Stolen from internet
