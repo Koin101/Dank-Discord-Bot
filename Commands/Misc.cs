@@ -32,7 +32,7 @@ namespace Discord_Bot.Commands
         HttpClient client = new HttpClient();
         StableDiffusionApi StableDiffusionApi = new StableDiffusionApi();
 
-        [Command("chatGPT"), Description("this is chatGPT description")]
+        [Command("chatGPT"), Description("this is chatGPT description"), Obsolete("no longer in use")]
         /// <summary>
         /// Ask anything to the completion AI of OpenAI and it will respond
         /// <param name="prompt"/> The prompt which will be asked to the AI. Make sure to use "" around your prompt! </param>

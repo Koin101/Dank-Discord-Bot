@@ -19,7 +19,8 @@ namespace Discord_Bot.Commands
 		Dictionary<ulong, int[]> rolledCivs = new Dictionary<ulong, int[]>();
 		private Random random = new Random();
 
-		[Command("rollcivs")]
+		[Command("rollcivs"), Description("Generate random civilizations (LekMod + all DLC) for the game Civ 5 " +
+		                                  "\n You can specify an amount as parameter. Default is 5 civs")]
 		public async Task RollCivs(CommandContext ctx)
 		{
 			await RollCivs(ctx, "5");
@@ -32,7 +33,8 @@ namespace Discord_Bot.Commands
 
 			//The code below generates a list of indexes for the civs array. It makes sure all indexes are unique.
 
-			//When i=0 this for loop picks out of all civs in the civs array, which then can't be picked again. Thus leaving civs.Length-1 options, etc.
+			//When i=0 this for loop picks out of all civs in the civs array, which then can't be picked again.
+			//Thus leaving civs.Length-1 options, etc.
 			for (int i = 0; i < rolls; i++)
 				civIndexes[i] = random.Next(0, civs.Length - i);
 			//If the index 6 has been chosen twice that means that out of the civs the civ with index 6 has been chosen

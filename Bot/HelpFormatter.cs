@@ -128,7 +128,8 @@ namespace Discord_Bot
         {
             if ((object)Command == null)
             {
-                EmbedBuilder.WithDescription("Listing all top-level commands and groups. Specify a command to see more information.");
+                EmbedBuilder.WithDescription("Imagine needing help LMAO. If u need even more help you can " +
+                                             "specify a command to see more information.");
             }
 
             return new CommandHelpMessage(null, EmbedBuilder.Build());
