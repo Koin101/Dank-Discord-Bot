@@ -396,3 +396,8 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+.idea 
+Discord Bot - Backup.csproj
+Discord Bot.csproj
+.gitattributes

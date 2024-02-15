@@ -209,7 +209,7 @@ public class Bot
     {
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
         {
-            StringPrefixes = new[] { "!!" }
+            StringPrefixes = new[] { "!!!" }
         });
         commands.SetHelpFormatter<CustomHelpFormatter>();
         commands.RegisterCommands<Misc>();
