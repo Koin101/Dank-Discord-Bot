@@ -7,10 +7,13 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
 
 namespace Discord_Bot.Commands
 {
-	public class CivRolls : BaseCommandModule
+	public class CivRolls : ApplicationCommandModule
 	{
 		private static string root = Directory.GetCurrentDirectory();
 		private static string path = Path.Combine(root, "CivRolls.txt");
@@ -19,20 +22,21 @@ namespace Discord_Bot.Commands
 		Dictionary<ulong, int[]> rolledCivs = new Dictionary<ulong, int[]>();
 		private Random random = new Random();
 
-		[Command("rollcivs"), Description("Generate random civilizations (LekMod + all DLC) for the game Civ 5 " +
-		                                  "\n You can specify an amount as parameter. Default is 5 civs")]
-		public async Task RollCivs(CommandContext ctx)
+		// [SlashCommand("rollcivs", "Generate random civilizations (LekMod and all DLC) for the game Civ 5")]
+		// public async Task RollCivs(InteractionContext ctx)
+		// {
+		// 	await RollCivs(ctx, "5");
+		// }
+		[SlashCommand("rollcivs", "Generate random civilizations (LekMod and all DLC) for the game Civ 5 ")]
+		public async Task RollCivs(InteractionContext ctx, 
+			[Option("amount", "amount of civs to roll")] string amount="5")
 		{
-			await RollCivs(ctx, "5");
-		}
-		[Command("rollcivs")]
-		public async Task RollCivs(CommandContext ctx, string amount)
-		{
+			await ctx.DeferAsync();
 			int rolls = int.Parse(amount);
 			int[] civIndexes = new int[rolls];
-
+		
 			//The code below generates a list of indexes for the civs array. It makes sure all indexes are unique.
-
+		
 			//When i=0 this for loop picks out of all civs in the civs array, which then can't be picked again.
 			//Thus leaving civs.Length-1 options, etc.
 			for (int i = 0; i < rolls; i++)
@@ -47,11 +51,13 @@ namespace Discord_Bot.Commands
 						civIndexes[i]++;
 			}
 			await OutputCivs(ctx, civIndexes);
-
+		
 		}
-		[Command("reroll")]
-		public async Task RerollCiv(CommandContext ctx, string index)
+		[SlashCommand("reroll", "Reroll your rolled civs")]
+		public async Task RerollCiv(InteractionContext ctx, 
+			[Option("index", "index of civ to reroll")] string index)
 		{
+			await ctx.DeferAsync();
 			int[] civIndexes = rolledCivs[ctx.Member.Id];
 			int indexInput = int.Parse(index);
 			bool found = false;
@@ -66,7 +72,7 @@ namespace Discord_Bot.Commands
 			civIndexes[indexInput] = civIndex;
 			await OutputCivs(ctx, civIndexes);
 		}
-		public async Task OutputCivs(CommandContext ctx, int[] indexes)
+		public async Task OutputCivs(InteractionContext ctx, int[] indexes)
 		{
 			QuickSort.SortQuick(indexes, 0, indexes.Length - 1);
 
@@ -81,7 +87,7 @@ namespace Discord_Bot.Commands
 			for (int i = 0; i < indexes.Length; i++)
 				message += "\n-" + civs[indexes[i]];
 
-			await ctx.RespondAsync(message);
+			await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(message));
 		}
 
 		public static string[] LoadCivFile(string path)
@@ -93,7 +99,6 @@ namespace Discord_Bot.Commands
 				string civ = line.Split(" ")[1];
 				civss.Add(civ);
 			}
-
 			return civss.ToArray();
 		}
 	}

@@ -1,139 +1,84 @@
-﻿using DSharpPlus.EventArgs;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using System.Threading;
+using Bot;
+using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
+using Lavalink4NET.Events.Players;
+using Lavalink4NET.Players.Queued;
 
 namespace Discord_Bot;
+
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 using Discord_Bot.Commands;
-using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
-using System.Reflection.Metadata;
 using DSharpPlus.Net;
 using DSharpPlus.Lavalink;
+using DSharpPlus.EventArgs;
 using System.Linq;
-using DSharpPlus.Lavalink.Entities;
 using System.Timers;
-using RiotSharp.Endpoints.LeagueEndpoint;
-using KGySoft.CoreLibraries;
-using KGySoft.ComponentModel;
+using Lavalink4NET;
+using Lavalink4NET.Extensions;
+using Lavalink4NET.Players;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 
-public class Bot
+
+public class Bot(
+        ILogger<Bot> logger,
+        DiscordClient discord,
+        IAudioService audioService,
+        IServiceProvider serviceProvider,
+        IServiceScopeFactory serviceScopeFactory) : BackgroundService
 {
-    private DiscordClient discord;
-    private LavalinkExtension lavalink;
+    // private LavalinkExtension lavalink;
     private bool spamReactions = true;
-    
     const string auke = "sonicos1";
     const string max = "maddestofmaxes";
     const string koen = "Neoblasterz";
     (string,string)[] pairs = {(auke, ":cum:"), (max, ":clown:"), (koen, ":men_wrestling:")};
+
     
-    public async Task Init()
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var root = Directory.GetCurrentDirectory();
-        var dotenv = Path.Combine(root, ".env");
-        DotEnv.Load(dotenv);
-        discord = new DiscordClient(new DiscordConfiguration()
-        {
-            Token = Environment.GetEnvironmentVariable("DiscordToken"),
-            TokenType = TokenType.Bot,
-            Intents = DiscordIntents.All,
-            MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Debug,
-            LogTimestampFormat = "dd MMM yyyy - hh:mm:ss"
-        });
+        RegisterStandardCommands();
         
-        var endpoint = new ConnectionEndpoint
+        var commands = discord.UseSlashCommands(new SlashCommandsConfiguration
         {
-            Hostname = "127.0.0.1", // From your server configuration.
-            Port = 2333 // From your server configuration
-        };
-        var lavalinkConfig = new LavalinkConfiguration
-        {
-            Password = "youshallnotpass", // From your server configuration.
-            RestEndpoint = endpoint,
-            SocketEndpoint = endpoint
-        };
-        lavalink = discord.UseLavalink();
+            Services = serviceProvider
+        });
+        commands.RegisterCommands<CivRolls>(470924483302260746);
+        commands.RegisterCommands<MusicLavalink40>(470924483302260746);
+
+        discord.ComponentInteractionCreated += ClientOnComponentInteractionCreated;
+        audioService.WebSocketClosed += AudioServiceOnWebSocketClosed;
 
         await discord.ConnectAsync();
-        await lavalink.ConnectAsync(lavalinkConfig);
 
-        funnyReactions();
-        funnyReplies();
-        registerCommands();
-        musicShit();
-        leagueShit();
+        await audioService.WaitForReadyAsync(stoppingToken);
+
+
+        logger.LogInformation("Connected to Discord and Lavalink");
+        
+        LeagueShit();
+        FunnyReplies();
         Pickwick pickwick = new Pickwick(discord);
         pickwick.Init();
 
-
-        await Task.Delay(-1);
     }
 
+    
     /// <summary>
     /// I don't know what this does
     /// </summary>
-    private void musicShit()
-    {
-        Music music = new Music();
-        var test = lavalink.GetIdealNodeConnection();
-
-        if (lavalink.ConnectedNodes.Any())
-        {
-
-            var lava = discord.GetLavalink();
-            var node = lava.ConnectedNodes.Values.First();
-            
-            node.PlaybackFinished += (s, e) => {
-                music.playbackFinished(node);
-                return Task.CompletedTask;
-            };
-        }
-
-        discord.ComponentInteractionCreated += async (s, e) =>
-        {
-            var lava = discord.GetLavalink();
-            var node = lava.ConnectedNodes.Values.First();
-            var conn = node.ConnectedGuilds.Values.First();
-
-            string buttonNr = e.Id.Split('_')[1];
-            int trackNr = int.Parse(buttonNr) - 1; 
-            if (trackNr == -1)
-            {
-                await e.Message.RespondAsync("You cancelled the command!");
-                return;
-            }
-
-            (LavalinkTrack track, int? count) = music.AddtoQueue(conn, trackNr).Result;
-
-            if(count is null)
-            {
-                await e.Interaction.CreateResponseAsync(
-                    InteractionResponseType.UpdateMessage,
-                    new DiscordInteractionResponseBuilder()
-                        .WithContent($"Now playing {track.Title}!"));
-            }
-            else
-            {
-                await e.Interaction.CreateResponseAsync(
-                    InteractionResponseType.UpdateMessage,
-                    new DiscordInteractionResponseBuilder()
-                        .WithContent($"Put {track.Title} into the queue. It's in {count}th place."));
-            }
-        };
-    }
-    /// <summary>
-    /// I don't know what this does
-    /// </summary>
-    private void leagueShit()
+    private void LeagueShit()
     {
         LeagueModule leagueApi = new LeagueModule();
-        //string apiKey = Environment.GetEnvironmentVariable("RiotApiKey");
-        //leagueApi.leagueClient.DefaultRequestHeaders.Add("X-Riot-Token", apiKey);
-        //leagueApi.leagueClient.DefaultRequestHeaders.Add("Origin", "https://developer.riotgames.com");
 
         Timer leagueTime = new(interval: 3600000); 
         leagueTime.Enabled = true;
@@ -154,7 +99,7 @@ public class Bot
     /// <summary>
     /// Makes funny replies to messages
     /// </summary>
-    private void funnyReplies()
+    private void FunnyReplies()
     {
         discord.MessageCreated += async (s, e) =>
         {
@@ -166,13 +111,14 @@ public class Bot
                 await e.Message.RespondAsync("I did");
             
             if (((message.Contains("im busy") || message.Contains("i'm busy")) && username == max)
-                || ((message.Contains("im straight") || message.Contains("i'm straight")) && username == auke)) await e.Message.RespondAsync("Cap!");
+                || ((message.Contains("im straight") || message.Contains("i'm straight")) && username == auke)) 
+                await e.Message.RespondAsync("Cap!");
         };
     }
     /// <summary>
     /// Adds funny reactions to messages
     /// </summary>
-    private void funnyReactions()
+    private void FunnyReactions()
     {
         //TODO: very obvious code duplication, but the eventArgs make this dfficult to fix.
         discord.MessageCreated += async (s, e) =>
@@ -205,16 +151,99 @@ public class Bot
     /// <summary>
     /// Sets the prefix and registers the commands classes to be used by the bot
     /// </summary>
-    private void registerCommands()
+    private void RegisterStandardCommands()
     {
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
         {
-            StringPrefixes = new[] { "!!!" }
+            StringPrefixes = new[] { "!!" }
         });
+
         commands.SetHelpFormatter<CustomHelpFormatter>();
+        
         commands.RegisterCommands<Misc>();
-        commands.RegisterCommands<CivRolls>();
         commands.RegisterCommands<LeagueModule>();
-        commands.RegisterCommands<Music>();
+
     }
+    
+    private Task AudioServiceOnWebSocketClosed(object sender, WebSocketClosedEventArgs eventargs)
+    {
+        logger.LogInformation("Socket Closed - Code: {Code}, Reason: {Reason}", eventargs.CloseCode, eventargs.Reason);
+        return Task.CompletedTask;
+    }
+    
+     private async Task ClientOnComponentInteractionCreated(DiscordClient sender,
+        ComponentInteractionCreateEventArgs args)
+    {
+        // var scope = serviceScopeFactory.CreateScope();
+        var id = args.Id!;
+        
+        var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(args.Guild.Id);
+        if (player is null)
+        {
+            await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent("No player found").AsEphemeral());
+            return;
+        }
+
+        var member = args.Guild.Members.GetValueOrDefault(args.User.Id);
+        if (member is null)
+        {
+            await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent("No member found").AsEphemeral());
+            return;
+        }
+
+        var vc = member.VoiceState?.Channel;
+        if (vc?.Id != player.VoiceChannelId)
+        {
+            await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent("You are not in the same voice channel as the bot")
+                    .AsEphemeral());
+            return;
+        }
+
+        switch (id)
+        {
+            case "toggle_playback":
+            {
+                if (player.IsPaused)
+                    await player.ResumeAsync();
+                else
+                    await player.PauseAsync();
+
+                break;
+            }
+            case "skip":
+            {
+                await player.SkipAsync();
+                break;
+            }
+            case "stop":
+            {
+                await player.StopAsync();
+                break;
+            }
+            case "toggle_repeat":
+            {
+                player.RepeatMode = player.RepeatMode == TrackRepeatMode.None
+                    ? TrackRepeatMode.Queue
+                    : TrackRepeatMode.None;
+
+                await player.TriggerMessageUpdate();
+
+                break;
+            }
+            case "toggle_shuffle":
+            {
+                player.Shuffle = !player.Shuffle;
+
+                await player.TriggerMessageUpdate();
+
+                break;
+            }
+        }
+
+        await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+    }
+
 }
