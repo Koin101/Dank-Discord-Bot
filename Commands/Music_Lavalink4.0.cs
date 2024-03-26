@@ -149,8 +149,7 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
             .WithTitle(currentTrack.Title)
             .WithDescription(currentTrack.Author)
             .WithUrl(currentTrack.Uri)
-            .WithThumbnail(currentTrack.ArtworkUri)
-            ;
+            .WithThumbnail(currentTrack.ArtworkUri);
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
     }
@@ -169,6 +168,42 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
 
         await player.PauseAsync();
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Paused"));
+    }
+
+    public async Task Queue(InteractionContext ctx)
+    {
+        await ctx.DeferAsync(true);
+
+        var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(ctx.Guild.Id);
+        if (player is null)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("I am not playing anything. " +
+                "So there is no queue smartypants"));
+            return;
+        }
+
+        var embed = new DiscordEmbedBuilder();
+
+        var queue = player.Queue;
+        int i = 0;
+        if (!(queue.Count > 0))
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("There is nothing in the queue!"));
+            return;
+        }
+        
+        foreach (var song in  queue)
+        {
+            if (song.Track is null)
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("There was an error"));
+                return;
+            }
+            embed.AddField($"{i}. ", song.Track.Title, false);
+            
+        }
+
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
     }
     
     
