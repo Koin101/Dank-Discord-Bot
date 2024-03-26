@@ -170,9 +170,10 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Paused"));
     }
 
+    [SlashCommand("queue", "Shows the current queue")]
     public async Task Queue(InteractionContext ctx)
     {
-        await ctx.DeferAsync(true);
+        await ctx.DeferAsync();
 
         var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(ctx.Guild.Id);
         if (player is null)
@@ -185,7 +186,7 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
         var embed = new DiscordEmbedBuilder();
 
         var queue = player.Queue;
-        int i = 0;
+        int i = 1;
         if (!(queue.Count > 0))
         {
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("There is nothing in the queue!"));
@@ -199,11 +200,13 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("There was an error"));
                 return;
             }
+
+            embed.Title = "The Queue";
             embed.AddField($"{i}. ", song.Track.Title, false);
-            
+            i++;
         }
 
-        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+        await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent("").WithEmbed(embed));
     }
     
     
