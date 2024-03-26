@@ -208,8 +208,34 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
 
         await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent("").WithEmbed(embed));
     }
-    
-    
+
+    [SlashCommand("position", "Shows the progress of the current track")]
+    public async Task Position(InteractionContext ctx)
+    {
+        await ctx.DeferAsync();
+
+        var player = await audioService.Players.GetPlayerAsync(ctx.Guild.Id);
+
+        if (player is null)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .WithContent("im not playing anything."));
+            return;
+        }
+
+        if (player.CurrentTrack is null)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .WithContent("im not playing anything."));
+            return;
+        }
+
+        var embed =  new DiscordEmbedBuilder()
+            .WithDescription($"Position: {player.Position?.Position} / {player.CurrentTrack.Duration}.");
+
+        await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
+            .WithContent("").WithEmbed(embed));
+    }
     private static ValueTask<EmbedDisplayPlayer> CreatePlayerAsync(
         IPlayerProperties<EmbedDisplayPlayer, EmbedDisplayPlayerOptions> properties,
         CancellationToken cancellationToken = default)
@@ -219,7 +245,26 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
         
         return ValueTask.FromResult(new EmbedDisplayPlayer(properties));
     }
-    
+
+    [SlashCommand("skip", "Skips the current song")]
+    public async Task Skip(InteractionContext ctx)
+    {
+        await ctx.DeferAsync();
+        var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(ctx.Guild.Id);
+
+        if (player is null)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .WithContent("I am not playing anything."));
+            return;   
+        }
+
+        var skippedSong = player.CurrentTrack;
+        await player.SkipAsync();
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+            .WithContent($"Skipped {skippedSong.Title}"));
+
+    }
     private static TrackSearchMode GetTrackSearchMode(SoundProvider provider)
     {
         return provider switch
