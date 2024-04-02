@@ -4,6 +4,7 @@ using System.Threading;
 using Bot;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
+using JsonFlatFileDataStore;
 using Lavalink4NET.Events.Players;
 using Lavalink4NET.Players.Queued;
 
@@ -36,24 +37,20 @@ public class Bot(
         IServiceProvider serviceProvider,
         IServiceScopeFactory serviceScopeFactory) : BackgroundService
 {
-    // private LavalinkExtension lavalink;
     private bool spamReactions = true;
     const string auke = "sonicos1";
     const string max = "maddestofmaxes";
     const string koen = "Neoblasterz";
     (string,string)[] pairs = {(auke, ":cum:"), (max, ":clown:"), (koen, ":men_wrestling:")};
 
+    private static DataStore jsonDB = new DataStore(Path.Join(Directory.GetCurrentDirectory(), "DankUsers.json"));
+    private IDocumentCollection<DankUser> dankUserCollection = jsonDB.GetCollection<DankUser>();
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         RegisterStandardCommands();
         
-        var commands = discord.UseSlashCommands(new SlashCommandsConfiguration
-        {
-            Services = serviceProvider
-        });
-        commands.RegisterCommands<CivRolls>(470924483302260746);
-        commands.RegisterCommands<MusicLavalink40>(470924483302260746);
+        RegisterSlashCommands();
 
         discord.ComponentInteractionCreated += ClientOnComponentInteractionCreated;
         audioService.WebSocketClosed += AudioServiceOnWebSocketClosed;
@@ -164,6 +161,19 @@ public class Bot(
         commands.RegisterCommands<LeagueModule>();
 
     }
+
+    private void RegisterSlashCommands()
+    {
+        var commands = discord.UseSlashCommands(new SlashCommandsConfiguration
+        {
+            Services = serviceProvider
+        });
+        
+        commands.RegisterCommands<CivRolls>(Convert.ToUInt64(
+            Environment.GetEnvironmentVariable("GuildID")));
+        commands.RegisterCommands<MusicLavalink40>(Convert.ToUInt64(
+            Environment.GetEnvironmentVariable("GuildID")));
+    }
     
     private Task AudioServiceOnWebSocketClosed(object sender, WebSocketClosedEventArgs eventargs)
     {
@@ -244,6 +254,17 @@ public class Bot(
         }
 
         await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+    }
+
+    private void LoadDankUsersFromFile()
+    {
+        var path = Directory.GetCurrentDirectory();
+        var fileName = "DankUsers.json";
+
+        foreach (var line in File.ReadLines(Path.Join(path, fileName)))
+        {
+            
+        }
     }
 
 }

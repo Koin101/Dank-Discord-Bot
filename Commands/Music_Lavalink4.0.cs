@@ -84,7 +84,7 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
         }
 
         var searchMode = GetTrackSearchMode(provider);
-
+            
         var isPlaylist = query.Contains("playlist");
         if (isPlaylist)
         {
@@ -212,7 +212,7 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
     [SlashCommand("position", "Shows the progress of the current track")]
     public async Task Position(InteractionContext ctx)
     {
-        await ctx.DeferAsync();
+        await ctx.DeferAsync(true);
 
         var player = await audioService.Players.GetPlayerAsync(ctx.Guild.Id);
 
@@ -236,6 +236,42 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
         await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
             .WithContent("").WithEmbed(embed));
     }
+    
+    [SlashCommand("lyrics", "Shows the lyrics of the current song")]
+    public async Task Lyrics(InteractionContext ctx)
+    {
+        await ctx.DeferAsync();
+
+        var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(ctx.Guild.Id);
+        if (player is null)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("I am not playing anything."));
+            return;
+        }
+
+        var currentTrack = player.CurrentTrack;
+        if (currentTrack is null)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("No track playing."));
+            return;
+        }
+        
+        var lyrics = await lyricsService.GetLyricsAsync(currentTrack.Author, 
+            currentTrack.Title.Split(" - ")[1]);
+        if (lyrics is null)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("No lyrics found."));
+            return;
+        }
+
+        var embed = new DiscordEmbedBuilder()
+            .WithTitle(currentTrack.Title)
+            .WithDescription(lyrics)
+            .WithThumbnail(currentTrack.ArtworkUri);
+
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed));
+    }
+    
     private static ValueTask<EmbedDisplayPlayer> CreatePlayerAsync(
         IPlayerProperties<EmbedDisplayPlayer, EmbedDisplayPlayerOptions> properties,
         CancellationToken cancellationToken = default)
