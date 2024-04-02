@@ -301,6 +301,93 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
             .WithContent($"Skipped {skippedSong.Title}"));
 
     }
+    
+    
+    /* A slash command which removes a specified song from the queue*/ 
+    [SlashCommand("remove", "Removes a song from the queue")]
+    public async Task Remove(InteractionContext ctx,
+        [Option("index", "The index of the song to remove")] int index)
+    {
+        await ctx.DeferAsync();
+        var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(ctx.Guild.Id);
+
+        if (player is null)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .WithContent("I am not playing anything."));
+            return;   
+        }
+
+        if (index < 1 || index > player.Queue.Count)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .WithContent("Invalid index."));
+            return;
+        }
+
+        var removedSong = player.Queue.ElementAt(index - 1);
+        await player.Queue.RemoveAtAsync(index - 1);
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+            .WithContent($"Removed {removedSong.Track!.Title}"));
+    }
+    
+    [SlashCommand("stop", "Stops the current song")]
+    public async Task Stop(InteractionContext ctx)
+    {
+        await ctx.DeferAsync();
+        var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(ctx.Guild.Id);
+
+        if (player is null)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .WithContent("I am not playing anything."));
+            return;   
+        }
+
+        await player.StopAsync();
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+            .WithContent("Stopped"));
+    }
+    
+    [SlashCommand("resume", "Resumes the current song")]
+    public async Task Resume(InteractionContext ctx)
+    {
+        await ctx.DeferAsync();
+        var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(ctx.Guild.Id);
+
+        if (player is null)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .WithContent("I am not playing anything."));
+            return;   
+        }
+
+        await player.ResumeAsync();
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+            .WithContent("Resumed"));
+    }
+    
+    [SlashCommand("repeat", "Repeats the current song")]
+    public async Task Repeat(InteractionContext ctx)
+    {
+        await ctx.DeferAsync();
+        var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(ctx.Guild.Id);
+
+        if (player is null)
+        {
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .WithContent("I am not playing anything."));
+            return;   
+        }
+
+        player.RepeatMode = player.RepeatMode == TrackRepeatMode.None
+            ? TrackRepeatMode.Queue
+            : TrackRepeatMode.None;
+        
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+            .WithContent("Repeat mode toggled"));
+    }
+    
     private static TrackSearchMode GetTrackSearchMode(SoundProvider provider)
     {
         return provider switch

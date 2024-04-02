@@ -1,9 +1,13 @@
 ﻿using System;
 using System.IO;
 using DSharpPlus;
+using Lavalink4NET;
 using Lavalink4NET.Extensions;
 using Lavalink4NET.InactivityTracking.Extensions;
 using Lavalink4NET.Lyrics.Extensions;
+using Lavalink4NET.Players;
+using Lavalink4NET.Rest;
+using Lavalink4NET.Rest.Entities.Tracks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -48,7 +52,9 @@ public class Program
             //Leave VC after 60 sec of no music playing
             cfg.DefaultTimeout = TimeSpan.FromSeconds(60);
         });
-
+        
+        
+    
 
         var host = builder.Build();
         host.Run();  
