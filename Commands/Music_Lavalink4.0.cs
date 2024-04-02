@@ -306,8 +306,9 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
     /* A slash command which removes a specified song from the queue*/ 
     [SlashCommand("remove", "Removes a song from the queue")]
     public async Task Remove(InteractionContext ctx,
-        [Option("index", "The index of the song to remove")] int index)
+        [Option("index", "The index of the song to remove")] string index)
     {
+        int index2 = Convert.ToInt32(index);
         await ctx.DeferAsync();
         var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(ctx.Guild.Id);
 
@@ -318,7 +319,7 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
             return;   
         }
 
-        if (index < 1 || index > player.Queue.Count)
+        if (index2 < 1 || index2 > player.Queue.Count)
         {
             await ctx.EditResponseAsync(new DiscordWebhookBuilder()
                 .WithContent("Invalid index."));
