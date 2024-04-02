@@ -326,8 +326,8 @@ public class MusicLavalink40(IAudioService audioService, ILogger<MusicLavalink40
             return;
         }
 
-        var removedSong = player.Queue.ElementAt(index - 1);
-        await player.Queue.RemoveAtAsync(index - 1);
+        var removedSong = player.Queue.ElementAt(index2 - 1);
+        await player.Queue.RemoveAtAsync(index2 - 1);
         await ctx.EditResponseAsync(new DiscordWebhookBuilder()
             .WithContent($"Removed {removedSong.Track!.Title}"));
     }
