@@ -24,24 +24,14 @@ public class Program
         var dotenv = Path.Combine(root, ".env");
         DotEnv.Load(dotenv);
         var builder = Host.CreateApplicationBuilder(args);
-
+        string token = Environment.GetEnvironmentVariable("Discord Token");
+        DiscordClientBuilder discordBuilder =  DiscordClientBuilder.CreateDefault(token, DiscordIntents.AllUnprivileged);
+        discordBuilder.SetLogLevel(LogLevel.Debug);
+        
         builder.Services.AddMemoryCache();
         builder.Services.AddHostedService<Bot>();
         builder.Services.AddSingleton<DiscordClient>();
-        builder.Services.AddSingleton<DiscordConfiguration>(_ =>
-        {
-            var token = Environment.GetEnvironmentVariable("DiscordToken");
-            var config = new DiscordConfiguration
-            {
-                Token = token,
-                TokenType = TokenType.Bot,
-                Intents = DiscordIntents.AllUnprivileged,
-                MinimumLogLevel = LogLevel.Information,
-                LogUnknownEvents = false
-            };
-
-            return config;
-        });
+        builder.Services.AddSingleton<DiscordClientBuilder>(discordBuilder);
 
         builder.Services.AddLavalink();
         builder.Services.AddLyrics();
@@ -57,6 +47,7 @@ public class Program
     
 
         var host = builder.Build();
+        
         host.Run();  
     }
 }

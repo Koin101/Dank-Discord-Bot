@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Threading;
 using Bot;
 using DSharpPlus.EventArgs;
-using DSharpPlus.SlashCommands;
+using DSharpPlus.Commands;
 using JsonFlatFileDataStore;
 using Lavalink4NET.Events.Players;
 using Lavalink4NET.Players.Queued;
