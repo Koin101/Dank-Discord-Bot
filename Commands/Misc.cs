@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Net.Http;
+using DSharpPlus.SlashCommands;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -13,33 +14,10 @@ namespace Discord_Bot.Commands
 {
     public class Misc : BaseCommandModule
     {
-        private readonly RedditAPi _reddit = new RedditAPi();
         private readonly GifCreator _gifCreator = new GifCreator();
         private readonly HttpClient _client = new HttpClient();
 
-        [Command("redditPost")]
-        public async Task RandomRedditPost(CommandContext ctx, [Description("The subreddit u want a post from")] string subreddit)
-        {
-            await ctx.TriggerTypingAsync();
-            DiscordMessage message;
-            var post = _reddit.RetrieveRandomPostFromSubreddit(subreddit);
-            DiscordEmbedBuilder.EmbedFooter footer = new DiscordEmbedBuilder.EmbedFooter();
-            footer.Text = "this is a footer";
-            footer.IconUrl = "https://www.iconpacks.net/icons/2/free-reddit-logo-icon-2436-thumb.png";
-
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder
-            {
-                Color = DiscordColor.Black,
-                Title = post.Title,
-                ImageUrl = post.URL,
-                Footer = footer,
-            };
-            
-            if (post.NSFW && !ctx.Channel.IsNSFW) { message = await ctx.RespondAsync("This is a non nsfw channel. Please ask for nsfw subreddits in an nsfw channel."); }
-            else { message = await ctx.RespondAsync(embed: embed); }
-
-            await message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
-        }
+        
 
 
         [Command("creategif")]

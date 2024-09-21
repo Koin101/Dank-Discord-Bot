@@ -8,28 +8,30 @@ using Reddit.Things;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Subreddit = Reddit.Controllers.Subreddit;
 
 namespace Discord_Bot
 {
     public class RedditAPi
     {
-        RedditClient r = new RedditClient(appId: Environment.GetEnvironmentVariable("RedditID"),
+        private static readonly RedditClient Reddit = new RedditClient(appId: Environment.GetEnvironmentVariable("RedditID"),
                              appSecret: Environment.GetEnvironmentVariable("RedditSecret"), refreshToken: Environment.GetEnvironmentVariable("RedditRefreshToken"));
-        Random rdm = new Random();
-
-
+        private readonly Random _rdm = new Random();
 
         public LinkPost RetrieveRandomPostFromSubreddit(string subreddit)
         {
-            var posts = r.Subreddit(subreddit).Posts.Hot;
+            var posts = Reddit.Subreddit(subreddit).Posts.Hot;
 
-            var randomPost = posts[rdm.Next(posts.Count)];
-
-            //while(randomPost.Listing.IsSelf) { randomPost = posts[rdm.Next(posts.Count)]; }
-
+            var randomPost = posts[_rdm.Next(posts.Count)];
+            
             return (LinkPost) randomPost;
 
         }
+        
+        private Subreddit _eyebleach = Reddit.Subreddit("eyebleach"); 
+        
+        
+        
     }
 }
             
