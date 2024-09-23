@@ -46,7 +46,7 @@ public class Program
         builder.Services.AddLavalink();
         builder.Services.AddLyrics();
         builder.Services.AddInactivityTracking();
-
+        
         builder.Services.ConfigureInactivityTracking(cfg =>
         {
             //Leave VC after 60 sec of no music playing

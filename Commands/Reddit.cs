@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
@@ -7,20 +9,29 @@ using Reddit.Controllers.EventArgs;
 
 namespace Discord_Bot.Commands;
 
-public class Reddit : BaseCommandModule
+public class Reddit : ApplicationCommandModule
 {
     
-    private readonly RedditAPi _reddit = new RedditAPi();
-
+    private readonly RedditAPi _reddit = new();
+    
+    
+    
     [SlashCommand("redditPost", "Get a random post from a specified subreddit")]
     public async Task RandomRedditPost(InteractionContext ctx, 
         [Option("subreddit","The subreddit u want a post from")] string subreddit)
     {
-        await ctx.DeferAsync();
+      
         var post = _reddit.RetrieveRandomPostFromSubreddit(subreddit);
+
+        if (post.URL.Contains("redgifs"))
+        {
+            await ctx.CreateResponseAsync(post.URL);
+        }
         DiscordEmbedBuilder.EmbedFooter footer = new DiscordEmbedBuilder.EmbedFooter();
         footer.Text = "this is a footer";
         footer.IconUrl = "https://www.iconpacks.net/icons/2/free-reddit-logo-icon-2436-thumb.png";
+        
+        Console.WriteLine(post.URL);
 
         DiscordEmbedBuilder embed = new DiscordEmbedBuilder
         {
@@ -37,11 +48,6 @@ public class Reddit : BaseCommandModule
     }
     
     
-    public static void C_NewPostsUpdated(object sender, PostsUpdateEventArgs e)
-    {
-        foreach (var post in e.Added)
-        {
-            Console.WriteLine("New Post by " + post.Author + ": " + post.Title);
-        }
-    }
+    
+    
 }

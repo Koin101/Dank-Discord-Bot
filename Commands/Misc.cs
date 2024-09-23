@@ -16,9 +16,7 @@ namespace Discord_Bot.Commands
     {
         private readonly GifCreator _gifCreator = new GifCreator();
         private readonly HttpClient _client = new HttpClient();
-
         
-
 
         [Command("creategif")]
         public async Task CreateGif(CommandContext ctx)
@@ -76,7 +74,7 @@ namespace Discord_Bot.Commands
                 Console.WriteLine(error.ToString());
                 Console.WriteLine(error.StackTrace);
                 Console.WriteLine("\n\n\n\n\n-------------------------");
-                await ctx.RespondAsync("I got an HttpRequestException. \nI might not have permission to acces the gif link.");
+                await ctx.RespondAsync("I got an HttpRequestException. \nI might not have permission to access the gif link.");
             }
             catch (Exception e)
             {
