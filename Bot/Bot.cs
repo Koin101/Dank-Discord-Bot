@@ -5,6 +5,7 @@ using Bot;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using JsonFlatFileDataStore;
+using KGySoft.CoreLibraries;
 using Lavalink4NET.Events.Players;
 using Lavalink4NET.Players.Queued;
 
@@ -45,28 +46,30 @@ public class Bot(
 
     private static DataStore jsonDB = new DataStore(Path.Join(Directory.GetCurrentDirectory(), "DankUsers.json"));
     private IDocumentCollection<DankUser> dankUserCollection = jsonDB.GetCollection<DankUser>();
-    
+   
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         RegisterStandardCommands();
         
         RegisterSlashCommands();
+        
 
-        discord.ComponentInteractionCreated += ClientOnComponentInteractionCreated;
-        audioService.WebSocketClosed += AudioServiceOnWebSocketClosed;
 
         await discord.ConnectAsync();
-
         await audioService.WaitForReadyAsync(stoppingToken);
-
-
+        
+        discord.ComponentInteractionCreated += ClientOnComponentInteractionCreated;
+        audioService.WebSocketClosed += AudioServiceOnWebSocketClosed;
+        
+        
+        
         logger.LogInformation("Connected to Discord and Lavalink");
         
         // LeagueShit(); something is broken do not want to fix it
         FunnyReplies();
         Pickwick pickwick = new Pickwick(discord);
         pickwick.Init();
-
+        
     }
 
     
@@ -107,7 +110,8 @@ public class Bot(
             if ((message == "who asked" || message == "who asked?") && !isMaintainer)
                 await e.Message.RespondAsync("I did");
             
-            if (((message.Contains("im busy") || message.Contains("i'm busy")) && username == max)
+            if (((message.Contains("im busy") || message.Contains("i'm busy") ||  message.Contains("busy")) 
+                 && username == max)
                 || ((message.Contains("im straight") || message.Contains("i'm straight")) && username == auke)) 
                 await e.Message.RespondAsync("Cap!");
         };
@@ -173,6 +177,8 @@ public class Bot(
             Environment.GetEnvironmentVariable("GuildID")));
         commands.RegisterCommands<MusicLavalink40>(Convert.ToUInt64(
             Environment.GetEnvironmentVariable("GuildID")));
+        commands.RegisterCommands<Reddit>(Convert.ToUInt64(
+            Environment.GetEnvironmentVariable("GuildID")));
     }
     
     private Task AudioServiceOnWebSocketClosed(object sender, WebSocketClosedEventArgs eventargs)
@@ -186,6 +192,13 @@ public class Bot(
     {
         // var scope = serviceScopeFactory.CreateScope();
         var id = args.Id!;
+        
+        if(id == "link_resend")
+        {
+            await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent(args.Message.Embeds[0].Image.Url.ToString()));
+            return;
+        }
         
         var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(args.Guild.Id);
         if (player is null)
@@ -251,6 +264,7 @@ public class Bot(
 
                 break;
             }
+
         }
 
         await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
@@ -266,5 +280,6 @@ public class Bot(
             
         }
     }
+    
 
 }
