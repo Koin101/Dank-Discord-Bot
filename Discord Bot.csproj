@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <Reference Include="Reddit.NET">
-      <HintPath>..\..\..\Downloads\Reddit.NET.dll</HintPath>
+      <HintPath>Manual DLL files\Reddit.NET.dll</HintPath>
     </Reference>
   </ItemGroup>
 

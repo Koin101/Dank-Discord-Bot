@@ -33,7 +33,6 @@ public class Reddit : ApplicationCommandModule
         footer.Text = "If image doesn't load, click resend button";
         footer.IconUrl = "https://www.iconpacks.net/icons/2/free-reddit-logo-icon-2436-thumb.png";
         
-        Console.WriteLine(post.URL);
         var url = post.URL.Contains("reddit.com") ? post.URL.Replace("e", "x") : post.URL;
 
         DiscordEmbedBuilder embed = new DiscordEmbedBuilder
