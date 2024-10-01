@@ -21,86 +21,38 @@ namespace Discord_Bot
         private static readonly RedditClient Reddit = new RedditClient(appId: Environment.GetEnvironmentVariable("RedditID"),
                              appSecret: Environment.GetEnvironmentVariable("RedditSecret"), refreshToken: Environment.GetEnvironmentVariable("RedditRefreshToken"));
         private readonly Random _rdm = new();
-        private DiscordClient _discord;
         
         public static Dictionary<string, ulong> subredditsToMonitor = new();
         private static string _path = Path.Combine(Directory.GetCurrentDirectory(), "subreddits.txt");
         
-        public RedditAPi(DiscordClient discord)
-        {
-            _discord = discord;
-            ReadTxt(_path);
-        }
-
-        public RedditAPi()
-        {
-            
-        }
 
         public LinkPost RetrieveRandomPostFromSubreddit(string subreddit)
         {
-            var posts = Reddit.Subreddit(subreddit).Posts.Hot;
-
-            var randomPost = posts[_rdm.Next(posts.Count)];
-            
-            return (LinkPost) randomPost;
-
-        }
-        
-
-        public void StartToMonitor()
-        {
-            foreach (var subreddit in subredditsToMonitor.Keys)
+            var search = Reddit.SearchSubredditNames(subreddit, exact:true);
+            if (search[0].SubscriberCount <= 1000)
             {
-                Console.WriteLine("Starting to monitor: " + subreddit);
-                Reddit.Subreddit(subreddit).Posts.GetNew();
-                Reddit.Subreddit(subreddit).Posts.NewUpdated += C_NewPostsUpdated;
-                
+                return null;
             }
+            var sub = Reddit.Subreddit(search[0].Name);
+            var url = sub.URL;
+            var posts = sub.Posts.Hot;
+
+            var randomPost = posts?[_rdm.Next(posts.Count)];
+        
+            return (LinkPost)randomPost;
             
         }
         
-        private static void ReadTxt(string path)
+        public LinkPost RetrieveNewestPostFromSubreddit(string subreddit)
         {
-            try
-            {
-                using var reader = new StreamReader(path);
-                while (reader.ReadLine() is { } line)
-                {
-                    var splits = line.Split(",");
-                    subredditsToMonitor[splits[0]] = Convert.ToUInt64(splits[1]);
-                }
-            }
-            catch (IOException ex)
-            {
-                Console.WriteLine("Error reading the file: " + ex.Message);
-            }
-        
-        }
+            var posts = Reddit.Subreddit(subreddit).Posts.New;
 
-        private void C_NewPostsUpdated(object sender, PostsUpdateEventArgs e)
-        {
-            Console.WriteLine("monitor triggered");
-            foreach (var post in e.Added)
-            {
-                var subreddit = post.Subreddit;
-                var channel = subredditsToMonitor[subreddit];
-                var discordChannel = _discord.GetChannelAsync(channel).Result;
-                var embed = new DiscordEmbedBuilder
-                {
-                    Title = post.Title,
-                    Url = post.Permalink,
-                    Color = DiscordColor.Black,
-                    Author = new DiscordEmbedBuilder.EmbedAuthor
-                    {
-                        Name = post.Author
-                    }
-                };
-                
-                discordChannel.SendMessageAsync(embed: embed);
-                
-            }
+            var newestPost = posts[0];
+            
+            return (LinkPost) newestPost;
+
         }
+        
     }
 }
             

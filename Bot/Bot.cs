@@ -70,9 +70,6 @@ public class Bot(
         Pickwick pickwick = new Pickwick(discord);
         pickwick.Init();
         
-        RedditAPi reddit = new RedditAPi(discord);
-        reddit.StartToMonitor();
-
     }
 
     
@@ -196,6 +193,13 @@ public class Bot(
         // var scope = serviceScopeFactory.CreateScope();
         var id = args.Id!;
         
+        if(id == "link_resend")
+        {
+            await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent(args.Message.Embeds[0].Image.Url.ToString()));
+            return;
+        }
+        
         var player = await audioService.Players.GetPlayerAsync<EmbedDisplayPlayer>(args.Guild.Id);
         if (player is null)
         {
@@ -260,6 +264,7 @@ public class Bot(
 
                 break;
             }
+
         }
 
         await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
