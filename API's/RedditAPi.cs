@@ -19,7 +19,8 @@ namespace Discord_Bot
     public class RedditAPi
     {
         private static readonly RedditClient Reddit = new RedditClient(appId: Environment.GetEnvironmentVariable("RedditID"),
-                             appSecret: Environment.GetEnvironmentVariable("RedditSecret"), refreshToken: Environment.GetEnvironmentVariable("RedditRefreshToken"));
+                             appSecret: Environment.GetEnvironmentVariable("RedditSecret"), refreshToken: Environment.GetEnvironmentVariable("RedditRefreshToken"), userAgent: "Discord Bot",
+                             accessToken: Environment.GetEnvironmentVariable("RedditAccessToken"));
         private readonly Random _rdm = new();
         
         public static Dictionary<string, ulong> subredditsToMonitor = new();

@@ -36,7 +36,7 @@ public class Program
                 Token = token,
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged,
-                MinimumLogLevel = LogLevel.Information,
+                MinimumLogLevel = LogLevel.Debug,
                 LogUnknownEvents = false
             };
 
