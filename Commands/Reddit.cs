@@ -39,7 +39,7 @@ public class Reddit : ApplicationCommandModule
         {
             Color = DiscordColor.Black,
             Title = "r/" + post.Subreddit + " " + post.Title ,
-            Author = new DiscordEmbedBuilder.EmbedAuthor{Name = post.Author},
+            Author = new DiscordEmbedBuilder.EmbedAuthor{Name = post.Author + "---" + "Sorted by: " + sortBy},
             ImageUrl = post.URL,
             Footer = footer,
         };
