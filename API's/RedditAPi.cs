@@ -89,7 +89,7 @@ namespace Discord_Bot
                 post.Title = postData.GetProperty("title").GetString();
                 post.URL = postData.GetProperty("url").GetString();
                 post.Subreddit = postData.GetProperty("subreddit").GetString();
-                post.Author = postData.GetProperty("author_fullname").GetString();
+                post.Author = postData.GetProperty("author").GetString();
                 post.NSFW = postData.GetProperty("over_18").GetBoolean();
                 
                 posts.Add(post);
