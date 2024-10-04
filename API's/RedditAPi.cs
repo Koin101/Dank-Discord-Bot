@@ -8,6 +8,9 @@ using Reddit.Things;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -16,44 +19,87 @@ using Subreddit = Reddit.Controllers.Subreddit;
 
 namespace Discord_Bot
 {
-    public class RedditAPi
+    public class RedditPost
     {
-        private static readonly RedditClient Reddit = new RedditClient(appId: Environment.GetEnvironmentVariable("RedditID"),
-                             appSecret: Environment.GetEnvironmentVariable("RedditSecret"), refreshToken: Environment.GetEnvironmentVariable("RedditRefreshToken"), userAgent: "Discord Bot",
-                             accessToken: Environment.GetEnvironmentVariable("RedditAccessToken"));
-        private readonly Random _rdm = new();
+        public string Title { get; set; }
+        public string URL { get; set; } 
+        public string Subreddit { get; set; }
+        public string Author { get; set; }
         
-        public static Dictionary<string, ulong> subredditsToMonitor = new();
-        private static string _path = Path.Combine(Directory.GetCurrentDirectory(), "subreddits.txt");
-        
+        public bool NSFW { get; set; }
 
-        public LinkPost RetrieveRandomPostFromSubreddit(string subreddit)
+        public override string ToString()
         {
-            var search = Reddit.SearchSubredditNames(subreddit, exact:true);
-            if (search[0].SubscriberCount <= 1000)
-            {
-                return null;
-            }
-            var sub = Reddit.Subreddit(search[0].Name);
-            var url = sub.URL;
-            var posts = sub.Posts.Hot;
-
-            var randomPost = posts?[_rdm.Next(posts.Count)];
-        
-            return (LinkPost)randomPost;
-            
+            return $"Title: {Title}\nUrl: {URL}\nSubreddit: {Subreddit}\nAuthor: {Author}";
+        }
+    }
+    public class RedditApi
+    {
+        private static HttpClient _httpClient = new();
+        private static Random _rdm = new();
+        private readonly string  _redditAccessToken;
+    
+    
+        public RedditApi(string redditAccessToken)
+        {
+            _redditAccessToken = redditAccessToken;
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "DankDiscordBot/1.0");
         }
         
-        public LinkPost RetrieveNewestPostFromSubreddit(string subreddit)
+        public async Task<RedditPost> GetRandomPostFromSubreddit(string subreddit, string sortBy)
         {
-            var posts = Reddit.Subreddit(subreddit).Posts.New;
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://oauth.reddit.com/r/{subreddit}/{sortBy}");
+            request.Headers.Add("Authorization", $"Bearer {_redditAccessToken}");
+            var response = await _httpClient.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                var posts = ParseRedditJson(responseBody);
+                var randomNr = _rdm.Next(posts.Count);
+                return posts[randomNr];
+            }
+            else
+            {
+                Console.WriteLine(response);
+                return null;
+            }
 
-            var newestPost = posts[0];
-            
-            return (LinkPost) newestPost;
+        }
+        
+        
+        
+        
+    
+        static List<RedditPost> ParseRedditJson(string responseBody)
+        {
+            List<RedditPost> posts = new List<RedditPost?>();
+        
+            using var doc = JsonDocument.Parse(responseBody);
+            var root = doc.RootElement;
+            var data = root.GetProperty("data");
+            var children = data.GetProperty("children");
 
+            Console.WriteLine("Top Posts:");
+
+            foreach (var child in children.EnumerateArray())
+            {
+                RedditPost post = new RedditPost();
+
+                var postData = child.GetProperty("data");
+                post.Title = postData.GetProperty("title").GetString();
+                post.URL = postData.GetProperty("url").GetString();
+                post.Subreddit = postData.GetProperty("subreddit").GetString();
+                post.Author = postData.GetProperty("author_fullname").GetString();
+                post.NSFW = postData.GetProperty("over_18").GetBoolean();
+                
+                posts.Add(post);
+            }
+
+            return posts;
         }
         
     }
+    
+
 }
             

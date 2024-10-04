@@ -14,17 +14,17 @@ namespace Discord_Bot.Commands;
 public class Reddit : ApplicationCommandModule
 {
     
-    private readonly RedditAPi _reddit = new();
+    private readonly RedditApi _reddit = new(Environment.GetEnvironmentVariable("RedditAccessToken"));
     
     
     
     [SlashCommand("redditPost", "Get a random post from a specified subreddit")]
     public async Task RandomRedditPost(InteractionContext ctx, 
         [Option("subreddit","The subreddit u want a post from")] string subreddit,
-        [Option("newest","Get the newest post instead of a random one")] bool newest = false)
+        [Option("SortBy","The sorting of the subreddit")] SortBy sortBy = SortBy.Hot)
     {
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-        var post = newest ? _reddit.RetrieveNewestPostFromSubreddit(subreddit) : _reddit.RetrieveRandomPostFromSubreddit(subreddit);
+        var post = await _reddit.GetRandomPostFromSubreddit(subreddit, GetSortBy(sortBy));
         
         if(post is null) await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("No posts found in this subreddit, maybe it does not exist."));
         var msgBuilder = new DiscordWebhookBuilder();
@@ -57,11 +57,33 @@ public class Reddit : ApplicationCommandModule
         {
             await ctx.EditResponseAsync(msgBuilder);
         }
-
-
+        
     }
     
     
     
+
+    private string GetSortBy(SortBy sortBy)
+    {
+        return sortBy switch
+        {
+            SortBy.Hot => "hot",
+            SortBy.New => "new",
+            SortBy.Top => "top",
+            SortBy.Rising => "rising",
+            _ => throw new ArgumentOutOfRangeException(nameof(sortBy), sortBy, null)
+        };
+    }
     
+    
+}
+
+
+
+public enum SortBy
+{
+    Hot,
+    New,
+    Top,
+    Rising
 }
