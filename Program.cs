@@ -50,7 +50,7 @@ public class Program
         builder.Services.ConfigureInactivityTracking(cfg =>
         {
             //Leave VC after 60 sec of no music playing
-            cfg.DefaultTimeout = TimeSpan.FromSeconds(60);
+            cfg.DefaultTimeout = TimeSpan.FromSeconds(360);
         });
         
         

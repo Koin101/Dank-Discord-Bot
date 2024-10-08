@@ -14,7 +14,8 @@ namespace Discord_Bot.Commands;
 public class Reddit : ApplicationCommandModule
 {
     
-    private readonly RedditApi _reddit = new(Environment.GetEnvironmentVariable("RedditAccessToken"));
+    private readonly RedditApi _reddit = new(Environment.GetEnvironmentVariable("RedditRefreshToken"),
+        Environment.GetEnvironmentVariable("RedditID"), Environment.GetEnvironmentVariable("RedditSecret"));
     
     
     

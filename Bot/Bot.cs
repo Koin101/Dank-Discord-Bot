@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
 using Bot;
-using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using JsonFlatFileDataStore;
-using KGySoft.CoreLibraries;
 using Lavalink4NET.Events.Players;
 using Lavalink4NET.Players.Queued;
 
@@ -18,14 +15,9 @@ using System.IO;
 using System.Threading.Tasks;
 using Discord_Bot.Commands;
 using DSharpPlus.Entities;
-using DSharpPlus.Net;
-using DSharpPlus.Lavalink;
 using DSharpPlus.EventArgs;
-using System.Linq;
 using System.Timers;
 using Lavalink4NET;
-using Lavalink4NET.Extensions;
-using Lavalink4NET.Players;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
@@ -49,7 +41,7 @@ public class Bot(
    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        RegisterStandardCommands();
+
         
         RegisterSlashCommands();
         
@@ -71,31 +63,7 @@ public class Bot(
         pickwick.Init();
         
     }
-
     
-    /// <summary>
-    /// I don't know what this does
-    /// </summary>
-    private void LeagueShit()
-    {
-        LeagueModule leagueApi = new LeagueModule();
-
-        Timer leagueTime = new(interval: 3600000); 
-        leagueTime.Enabled = true;
-        leagueTime.AutoReset = true;
-        leagueTime.Start();
-        
-        leagueTime.Elapsed += async (s, e) =>
-        {
-            var channel = await discord.GetChannelAsync(572581995276664838);
-
-            var embedGregoor = leagueApi.GetLastMatchFromSummonorTimerEvent("Gr3goor");
-            if(embedGregoor != null) await channel.SendMessageAsync(embedGregoor);
-
-            var embedMax = leagueApi.GetLastMatchFromSummonorTimerEvent("madismax");
-            if(embedMax != null) await channel.SendMessageAsync(embedMax);
-        };
-    }
     /// <summary>
     /// Makes funny replies to messages
     /// </summary>
