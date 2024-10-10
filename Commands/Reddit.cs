@@ -6,8 +6,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Reddit.Controllers;
-using Reddit.Controllers.EventArgs;
+
 
 namespace Discord_Bot.Commands;
 

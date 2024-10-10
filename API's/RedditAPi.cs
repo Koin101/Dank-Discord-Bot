@@ -1,10 +1,4 @@
-﻿using Reddit;
-using Reddit.Controllers;
-using Reddit.Inputs;
-using Reddit.Inputs.LinksAndComments;
-using Reddit.Inputs.Subreddits;
-using Reddit.Inputs.Users;
-using Reddit.Things;
+﻿
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,8 +9,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Reddit.Controllers.EventArgs;
-using Subreddit = Reddit.Controllers.Subreddit;
+
 
 namespace Discord_Bot
 {
