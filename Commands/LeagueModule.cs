@@ -129,8 +129,9 @@ namespace Discord_Bot.Commands
             if (response.IsSuccessStatusCode)
             {
                 // Parse the response and extract the summoner info
-                var summonerInfo = await response.Content.ReadAsAsync<SummonerInfo>();
-                return summonerInfo;
+                // var summonerInfo = await response.Content.ReadAsAsync<SummonerInfo>();
+                // return summonerInfo;
+                return null;
             }
             else
             {
