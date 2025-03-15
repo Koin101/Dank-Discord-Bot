@@ -402,3 +402,5 @@ Discord Bot - Backup.csproj
 Discord Bot.csproj
 .gitattributes
 .idea
+/Docker/Lavalink/plugins/
+/Docker/Bot/Data/.env

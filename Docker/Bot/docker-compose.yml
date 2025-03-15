@@ -1,0 +1,19 @@
+services:
+  bot:
+    build: .
+    container_name: DiscordBot
+    restart: unless-stopped
+    
+    volumes:
+      - ./Data/.env:/app/publish/.env
+      - ./Data/CivRolls.txt:/app/publish/CivRolls.txt
+      - ./Data/pickwick_teatopics.txt:/app/publish/pickwick_teatopics.txt
+      - ./Data/subreddits.txt:/app/publish/subreddits.txt
+      - ./Data/DankUsers.json:/app/publish/DankUsers.json
+
+    networks:
+      - lavalink
+  
+networks:
+  lavalink:
+    external: true
