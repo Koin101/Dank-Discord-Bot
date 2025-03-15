@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using DSharpPlus;
+using DSharpPlus.Lavalink;
+using DSharpPlus.Net;
 using Lavalink4NET;
 using Lavalink4NET.Extensions;
 using Lavalink4NET.InactivityTracking.Extensions;
@@ -44,6 +46,10 @@ public class Program
         });
 
         builder.Services.AddLavalink();
+        builder.Services.ConfigureLavalink(cfg =>
+        {
+            cfg.BaseAddress = new Uri("http://lavalink:2333");
+        });
         builder.Services.AddLyrics();
         builder.Services.AddInactivityTracking();
         

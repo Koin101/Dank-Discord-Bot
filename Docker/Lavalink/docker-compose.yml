@@ -16,6 +16,8 @@ services:
       - ./application.yml:/opt/Lavalink/application.yml
       # persist plugins between restarts, make sure to set the correct permissions (user: 322, group: 322)
       - ./plugins/:/opt/Lavalink/plugins/
+    expose:
+     - 2333
     networks:
       - lavalink
 networks:
