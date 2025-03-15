@@ -21,7 +21,7 @@ public class Program
     static void Main(string[] args)
     {
         var root = Directory.GetCurrentDirectory();
-        var dotenv = Path.Combine(root, ".env");
+        var dotenv = Path.Combine(root, "Data/.env");
         DotEnv.Load(dotenv);
         var builder = Host.CreateApplicationBuilder(args);
 

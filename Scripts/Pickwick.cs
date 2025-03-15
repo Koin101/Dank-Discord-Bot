@@ -19,7 +19,7 @@ namespace Discord_Bot
         {
             this.discord = discord;
             string root = Directory.GetCurrentDirectory();
-            string path = Path.Combine(root, "pickwick_teatopics.txt");
+            string path = Path.Combine(root, "Data/pickwick_teatopics.txt");
             ReadFile(path);
         }
 

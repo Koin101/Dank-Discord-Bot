@@ -16,7 +16,7 @@ namespace Discord_Bot.Commands
 	public class CivRolls : ApplicationCommandModule
 	{
 		private static string root = Directory.GetCurrentDirectory();
-		private static string path = Path.Combine(root, "CivRolls.txt");
+		private static string path = Path.Combine(root, "Data/CivRolls.txt");
 		private string[] civs = LoadCivFile(path);
 		
 		Dictionary<ulong, int[]> rolledCivs = new Dictionary<ulong, int[]>();

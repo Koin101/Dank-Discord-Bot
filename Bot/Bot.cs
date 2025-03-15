@@ -36,7 +36,7 @@ public class Bot(
     const string koen = "Neoblasterz";
     (string,string)[] pairs = {(auke, ":cum:"), (max, ":clown:"), (koen, ":men_wrestling:")};
 
-    private static DataStore jsonDB = new DataStore(Path.Join(Directory.GetCurrentDirectory(), "DankUsers.json"));
+    private static DataStore jsonDB = new DataStore(Path.Join(Directory.GetCurrentDirectory(), "Data/DankUsers.json"));
     private IDocumentCollection<DankUser> dankUserCollection = jsonDB.GetCollection<DankUser>();
    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
