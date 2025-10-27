@@ -34,7 +34,7 @@ public class Bot(
     const string auke = "sonicos1";
     const string max = "maddestofmaxes";
     const string koen = "Neoblasterz";
-    (string,string)[] pairs = {(auke, ":cum:"), (max, ":clown:"), (koen, ":men_wrestling:")};
+    (string,string)[] pairs = {(auke, ":clown:"), (max, ":clown:"), (koen, ":clown:")};
 
     private static DataStore jsonDB = new DataStore(Path.Join(Directory.GetCurrentDirectory(), "Data/DankUsers.json"));
     private IDocumentCollection<DankUser> dankUserCollection = jsonDB.GetCollection<DankUser>();
