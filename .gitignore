@@ -403,4 +403,5 @@ Discord Bot.csproj
 .gitattributes
 .idea
 /Docker/Lavalink/plugins/
-/Data/.env
+/Docker/Bot/Data/.env
+/Docker/yt-cipher
