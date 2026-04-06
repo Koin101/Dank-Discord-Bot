@@ -30,11 +30,9 @@ public class Bot(
         IServiceProvider serviceProvider,
         IServiceScopeFactory serviceScopeFactory) : BackgroundService
 {
-    private bool spamReactions = true;
     const string auke = "sonicos1";
     const string max = "maddestofmaxes";
     const string koen = "Neoblasterz";
-    (string,string)[] pairs = {(auke, ":clown:"), (max, ":clown:"), (koen, ":clown:")};
 
     private static DataStore jsonDB = new DataStore(Path.Join(Directory.GetCurrentDirectory(), "Data/DankUsers.json"));
     private IDocumentCollection<DankUser> dankUserCollection = jsonDB.GetCollection<DankUser>();
@@ -81,39 +79,6 @@ public class Bot(
                  && username == max)
                 || ((message.Contains("im straight") || message.Contains("i'm straight")) && username == auke)) 
                 await e.Message.RespondAsync("Cap!");
-        };
-    }
-    /// <summary>
-    /// Adds funny reactions to messages
-    /// </summary>
-    private void FunnyReactions()
-    {
-        //TODO: very obvious code duplication, but the eventArgs make this dfficult to fix.
-        discord.MessageCreated += async (s, e) =>
-        {
-            string username = e.Author.Username;
-            if(spamReactions)
-                foreach (var (name,emoji) in pairs)
-                    if (username == name)
-                        await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, emoji));
-        };
-
-        discord.MessageReactionRemovedEmoji += async (s, e) =>
-        {
-            string username = e.Message.Author.Username;
-            if(spamReactions)
-                foreach (var (name,emoji) in pairs)
-                    if (username == name)
-                        await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, emoji));
-        };
-
-        discord.MessageReactionsCleared += async (s, e) =>
-        {
-            string username = e.Message.Author.Username;
-            if(spamReactions)
-                foreach (var (name,emoji) in pairs)
-                    if (username == name)
-                        await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, emoji));
         };
     }
     /// <summary>
