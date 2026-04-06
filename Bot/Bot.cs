@@ -147,6 +147,9 @@ public class Bot(
             Environment.GetEnvironmentVariable("GuildID")));
         commands.RegisterCommands<Reddit>(Convert.ToUInt64(
             Environment.GetEnvironmentVariable("GuildID")));
+        commands.RegisterCommands<Admin>(Convert.ToUInt64(
+            Environment.GetEnvironmentVariable("GuildID")));
+        
     }
     
     private Task AudioServiceOnWebSocketClosed(object sender, WebSocketClosedEventArgs eventargs)

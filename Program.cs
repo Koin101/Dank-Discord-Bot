@@ -38,7 +38,7 @@ public class Program
                 Token = token,
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged,
-                MinimumLogLevel = LogLevel.Debug,
+                MinimumLogLevel = LogLevel.Trace,
                 LogUnknownEvents = false
             };
 
@@ -48,7 +48,7 @@ public class Program
         builder.Services.AddLavalink();
         builder.Services.ConfigureLavalink(cfg =>
         {
-            cfg.BaseAddress = new Uri("http://lavalink:2333");
+            cfg.BaseAddress = new Uri("http://localhost:2333");
         });
         builder.Services.AddLyrics();
         builder.Services.AddInactivityTracking();
