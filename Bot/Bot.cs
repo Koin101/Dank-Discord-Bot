@@ -57,7 +57,6 @@ public class Bot(
         
         logger.LogInformation("Connected to Discord and Lavalink");
         
-        // LeagueShit(); something is broken do not want to fix it
         FunnyReplies();
         Pickwick pickwick = new Pickwick(discord);
         pickwick.Init();
@@ -130,7 +129,6 @@ public class Bot(
         commands.SetHelpFormatter<CustomHelpFormatter>();
         
         commands.RegisterCommands<Misc>();
-        commands.RegisterCommands<LeagueModule>();
 
     }
 
