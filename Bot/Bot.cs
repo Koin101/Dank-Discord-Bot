@@ -2,21 +2,17 @@
 using System.Threading;
 using Bot;
 using DSharpPlus.SlashCommands;
-using JsonFlatFileDataStore;
 using Lavalink4NET.Events.Players;
 using Lavalink4NET.Players.Queued;
 
 namespace Discord_Bot;
 
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using Discord_Bot.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using System.Timers;
 using Lavalink4NET;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -33,9 +29,6 @@ public class Bot(
     const string auke = "sonicos1";
     const string max = "maddestofmaxes";
     const string koen = "Neoblasterz";
-
-    private static DataStore jsonDB = new DataStore(Path.Join(Directory.GetCurrentDirectory(), "Data/DankUsers.json"));
-    private IDocumentCollection<DankUser> dankUserCollection = jsonDB.GetCollection<DankUser>();
    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -81,22 +74,6 @@ public class Bot(
                 await e.Message.RespondAsync("Cap!");
         };
     }
-    /// <summary>
-    /// Sets the prefix and registers the commands classes to be used by the bot
-    /// </summary>
-    private void RegisterStandardCommands()
-    {
-        var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
-        {
-            StringPrefixes = new[] { "!!" }
-        });
-
-        commands.SetHelpFormatter<CustomHelpFormatter>();
-        
-        commands.RegisterCommands<Misc>();
-
-    }
-
     private void RegisterSlashCommands()
     {
         var commands = discord.UseSlashCommands(new SlashCommandsConfiguration
@@ -124,7 +101,6 @@ public class Bot(
      private async Task ClientOnComponentInteractionCreated(DiscordClient sender,
         ComponentInteractionCreateEventArgs args)
     {
-        // var scope = serviceScopeFactory.CreateScope();
         var id = args.Id!;
         
         if(id == "link_resend")
@@ -203,17 +179,4 @@ public class Bot(
 
         await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
     }
-
-    private void LoadDankUsersFromFile()
-    {
-        var path = Directory.GetCurrentDirectory();
-        var fileName = "DankUsers.json";
-
-        foreach (var line in File.ReadLines(Path.Join(path, fileName)))
-        {
-            
-        }
-    }
-    
-
 }

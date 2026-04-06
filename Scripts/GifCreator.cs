@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AnimatedGif;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
@@ -14,8 +9,6 @@ namespace Discord_Bot
 {
     internal class GifCreator
     {
-        public int count = 0;
-        public bool del = true;
         public MemoryStream memStream = new MemoryStream();
         public MemoryStream gifStream;
         static void Main(string[] args)
@@ -25,7 +18,6 @@ namespace Discord_Bot
 
         public void CreateGifFromImg(Image<Rgba32> img)
         {
-            Image<Rgba32> overlay = Image.Load<Rgba32>("Images/speechbubble.png");
             var imgToGif = RemovePixels(img);
             imgToGif.SaveAsGif(memStream);
             memStream.Seek(0, SeekOrigin.Begin);
