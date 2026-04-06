@@ -19,8 +19,6 @@ namespace Discord_Bot
     {
         HttpClient client;
 
-        bool busy;
-
         string webUiUrl = "http://127.0.0.1:7860/sdapi/v1/txt2img";
 
 

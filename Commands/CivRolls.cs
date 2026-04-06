@@ -1,11 +1,6 @@
-﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -22,11 +17,6 @@ namespace Discord_Bot.Commands
 		Dictionary<ulong, int[]> rolledCivs = new Dictionary<ulong, int[]>();
 		private Random random = new Random();
 
-		// [SlashCommand("rollcivs", "Generate random civilizations (LekMod and all DLC) for the game Civ 5")]
-		// public async Task RollCivs(InteractionContext ctx)
-		// {
-		// 	await RollCivs(ctx, "5");
-		// }
 		[SlashCommand("rollcivs", "Generate random civilizations (LekMod and all DLC) for the game Civ 5 ")]
 		public async Task RollCivs(InteractionContext ctx, 
 			[Option("amount", "amount of civs to roll")] string amount="5")

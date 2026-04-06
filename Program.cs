@@ -57,9 +57,7 @@ public class Program
         {
             //Leave VC after 60 sec of no music playing
             cfg.DefaultTimeout = TimeSpan.FromSeconds(360);
-        });
-        
-        
+        });   
     
 
         var host = builder.Build();

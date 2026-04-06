@@ -2,21 +2,17 @@
 using System.Threading;
 using Bot;
 using DSharpPlus.SlashCommands;
-using JsonFlatFileDataStore;
 using Lavalink4NET.Events.Players;
 using Lavalink4NET.Players.Queued;
 
 namespace Discord_Bot;
 
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using Discord_Bot.Commands;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using System.Timers;
 using Lavalink4NET;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -30,14 +26,9 @@ public class Bot(
         IServiceProvider serviceProvider,
         IServiceScopeFactory serviceScopeFactory) : BackgroundService
 {
-    private bool spamReactions = true;
     const string auke = "sonicos1";
     const string max = "maddestofmaxes";
     const string koen = "Neoblasterz";
-    (string,string)[] pairs = {(auke, ":clown:"), (max, ":clown:"), (koen, ":clown:")};
-
-    private static DataStore jsonDB = new DataStore(Path.Join(Directory.GetCurrentDirectory(), "Data/DankUsers.json"));
-    private IDocumentCollection<DankUser> dankUserCollection = jsonDB.GetCollection<DankUser>();
    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -57,7 +48,6 @@ public class Bot(
         
         logger.LogInformation("Connected to Discord and Lavalink");
         
-        // LeagueShit(); something is broken do not want to fix it
         FunnyReplies();
         Pickwick pickwick = new Pickwick(discord);
         pickwick.Init();
@@ -84,56 +74,6 @@ public class Bot(
                 await e.Message.RespondAsync("Cap!");
         };
     }
-    /// <summary>
-    /// Adds funny reactions to messages
-    /// </summary>
-    private void FunnyReactions()
-    {
-        //TODO: very obvious code duplication, but the eventArgs make this dfficult to fix.
-        discord.MessageCreated += async (s, e) =>
-        {
-            string username = e.Author.Username;
-            if(spamReactions)
-                foreach (var (name,emoji) in pairs)
-                    if (username == name)
-                        await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, emoji));
-        };
-
-        discord.MessageReactionRemovedEmoji += async (s, e) =>
-        {
-            string username = e.Message.Author.Username;
-            if(spamReactions)
-                foreach (var (name,emoji) in pairs)
-                    if (username == name)
-                        await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, emoji));
-        };
-
-        discord.MessageReactionsCleared += async (s, e) =>
-        {
-            string username = e.Message.Author.Username;
-            if(spamReactions)
-                foreach (var (name,emoji) in pairs)
-                    if (username == name)
-                        await e.Message.CreateReactionAsync(DiscordEmoji.FromName(s, emoji));
-        };
-    }
-    /// <summary>
-    /// Sets the prefix and registers the commands classes to be used by the bot
-    /// </summary>
-    private void RegisterStandardCommands()
-    {
-        var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
-        {
-            StringPrefixes = new[] { "!!" }
-        });
-
-        commands.SetHelpFormatter<CustomHelpFormatter>();
-        
-        commands.RegisterCommands<Misc>();
-        commands.RegisterCommands<LeagueModule>();
-
-    }
-
     private void RegisterSlashCommands()
     {
         var commands = discord.UseSlashCommands(new SlashCommandsConfiguration
@@ -161,7 +101,6 @@ public class Bot(
      private async Task ClientOnComponentInteractionCreated(DiscordClient sender,
         ComponentInteractionCreateEventArgs args)
     {
-        // var scope = serviceScopeFactory.CreateScope();
         var id = args.Id!;
         
         if(id == "link_resend")
@@ -240,17 +179,4 @@ public class Bot(
 
         await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
     }
-
-    private void LoadDankUsersFromFile()
-    {
-        var path = Directory.GetCurrentDirectory();
-        var fileName = "DankUsers.json";
-
-        foreach (var line in File.ReadLines(Path.Join(path, fileName)))
-        {
-            
-        }
-    }
-    
-
 }
