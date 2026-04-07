@@ -410,3 +410,4 @@ Discord Bot.csproj
 /Docker/Lavalink/plugins/
 /Docker/Bot/Data/.env
 /Docker/yt-cipher
+/Docker/Lavalink/Lavalink.jar
