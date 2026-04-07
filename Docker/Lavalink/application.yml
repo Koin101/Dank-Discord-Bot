@@ -15,6 +15,7 @@ lavalink:
 
 
   server:
+    password: "youshallnotpass"
     sources:
       youtube: false
       bandcamp: true
