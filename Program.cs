@@ -48,7 +48,8 @@ public class Program
         builder.Services.AddLavalink();
         builder.Services.ConfigureLavalink(cfg =>
         {
-            cfg.BaseAddress = new Uri("http://localhost:2333");
+            var lavalinkHost = Environment.GetEnvironmentVariable("LavalinkHost") ?? "localhost";
+            cfg.BaseAddress = new Uri($"http://{lavalinkHost}:2333");
         });
         builder.Services.AddLyrics();
         builder.Services.AddInactivityTracking();
